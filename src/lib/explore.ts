@@ -12,6 +12,8 @@ const GEO_ALIASES: Record<string, string> = {
   "Czech Republic": "Czechia",
 };
 
+const SPOTS_PER_DESTINATION = 40;
+
 export type ExploreTour = {
   id: string;
   slug: string;
@@ -26,6 +28,9 @@ export type ExploreTour = {
   months: string[]; // YYYY-MM of upcoming departures
 };
 
+/** An itinerary stop with a map position; revealed when zooming into an area. */
+export type ExploreSpot = { name: string; lat: number; lng: number };
+
 export type ExploreArea = {
   id: string;
   name: string;
@@ -33,6 +38,7 @@ export type ExploreArea = {
   lat: number | null;
   lng: number | null;
   image: string | null; // a tour photo from this area, used for its map pin
+  spots: ExploreSpot[];
   tours: ExploreTour[];
 };
 
@@ -45,6 +51,7 @@ export type ExploreCountry = {
   tourCount: number;
   areas: ExploreArea[];
   tours: ExploreTour[]; // tours filed under the country itself, not an area
+  spots: ExploreSpot[]; // stops of those country-level tours
 };
 
 /** Upcoming departures first (soonest), then by title. */
@@ -58,16 +65,28 @@ export function sortExploreTours(a: ExploreTour, b: ExploreTour) {
 /** Countries with published tours, most tours first, each with its areas as map pins. */
 export async function getExploreCountries(limit = 10): Promise<ExploreCountry[]> {
   const today = todayISO();
-  const [destinations, { data, error }] = await Promise.all([
+  const supabase = createPublicClient();
+  const [destinations, { data, error }, { data: placeRows, error: placeError }] = await Promise.all([
     getDestinations(),
-    createPublicClient()
+    supabase
       .from("tours")
       .select(
         "id, slug, title, tour_type, duration_days, duration_nights, price_from_myr, cover_image_url, destination_id, tour_departures(departure_date, status)",
       )
       .eq("status", "published"),
+    supabase.from("places").select("name, lat, lng, destination_id").not("lat", "is", null).not("lng", "is", null).order("name"),
   ]);
   if (error) throw error;
+  if (placeError) throw placeError;
+
+  const spotsByDest = new Map<string, ExploreSpot[]>();
+  for (const p of placeRows) {
+    if (!p.destination_id || p.lat == null || p.lng == null) continue;
+    const list = spotsByDest.get(p.destination_id) ?? [];
+    if (list.length >= SPOTS_PER_DESTINATION || list.some((s) => s.name.toLowerCase() === p.name.toLowerCase())) continue;
+    list.push({ name: p.name, lat: p.lat, lng: p.lng });
+    spotsByDest.set(p.destination_id, list);
+  }
 
   const byId = new Map(destinations.map((d) => [d.id, d]));
   const countries = new Map<string, ExploreCountry>();
@@ -90,6 +109,7 @@ export async function getExploreCountries(limit = 10): Promise<ExploreCountry[]>
         tourCount: 0,
         areas: [],
         tours: [],
+        spots: spotsByDest.get(country.id) ?? [],
       };
       countries.set(country.id, c);
     }
@@ -117,7 +137,16 @@ export async function getExploreCountries(limit = 10): Promise<ExploreCountry[]>
     if (dest.parent_id) {
       let area = c.areas.find((a) => a.id === dest.id);
       if (!area) {
-        area = { id: dest.id, name: dest.name, slug: dest.slug, lat: dest.lat, lng: dest.lng, image: dest.cover_image_url, tours: [] };
+        area = {
+          id: dest.id,
+          name: dest.name,
+          slug: dest.slug,
+          lat: dest.lat,
+          lng: dest.lng,
+          image: dest.cover_image_url,
+          spots: spotsByDest.get(dest.id) ?? [],
+          tours: [],
+        };
         c.areas.push(area);
       }
       if (!area.image && tour.cover_image_url) area.image = tour.cover_image_url;
