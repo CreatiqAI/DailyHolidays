@@ -75,7 +75,7 @@ export function TourFilters({ values, destinations, regions, months, types }: Pr
             <X className="size-4" /> Clear filters
           </Link>
         )}
-        <button type="submit" className="inline-flex items-center gap-2 rounded-full bg-sun-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-sun-500/25 hover:bg-sun-600">
+        <button type="submit" className="glass-sun inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white">
           <SlidersHorizontal className="size-4" /> Show trips
         </button>
       </div>

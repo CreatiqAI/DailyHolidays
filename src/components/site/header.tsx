@@ -54,7 +54,7 @@ export function Header() {
           ))}
           <a
             href={site.phoneHref}
-            className="ml-3 inline-flex items-center gap-2 rounded-full bg-sun-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-sun-500/25 transition hover:bg-sun-600"
+            className="glass-sun ml-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition"
           >
             <Phone className="size-4" /> {site.phone}
           </a>
@@ -78,7 +78,7 @@ export function Header() {
               {item.label}
             </Link>
           ))}
-          <a href={site.phoneHref} className="mt-4 flex items-center justify-center gap-2 rounded-full bg-sun-500 py-3 font-semibold text-white">
+          <a href={site.phoneHref} className="glass-sun mt-4 flex items-center justify-center gap-2 rounded-full py-3 font-semibold text-white">
             <Phone className="size-4" /> Call {site.phone}
           </a>
         </nav>

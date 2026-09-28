@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, CalendarDays, ChevronRight, Clock, MapPin } from "lucide-react";
 import type { ExploreCountry, ExploreTour } from "@/lib/explore";
 import { durationLabel, formatDate, formatMonth, formatRM } from "@/lib/format";
 import { CountryMap, type MapPin as Pin } from "./country-map";
+import { ScrollRow } from "./scroll-row";
 
 type Sort = "soonest" | "cheapest" | "shortest";
 
@@ -21,7 +22,7 @@ const sorters: Record<Sort, (a: ExploreTour, b: ExploreTour) => number> = {
 
 const chip = (active: boolean) =>
   `rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-    active ? "bg-sun-500 text-white shadow-lg shadow-sun-500/30" : "bg-white/10 text-white ring-1 ring-white/10 hover:bg-white/20"
+    active ? "glass-sun" : "glass"
   }`;
 
 /** Measured height of an element, so the map can fit the country between the overlays. */
@@ -53,32 +54,6 @@ function HeroBackdrop({ image }: { image: string | null }) {
       )}
       {/* soften the photo so the map reads as the subject */}
       <div className="absolute inset-0 bg-navy-950/60 backdrop-blur-[2px]" />
-    </div>
-  );
-}
-
-/** Horizontal, snapping card shelf with arrow buttons on large screens. */
-function Shelf({ children, itemKey }: { children: ReactNode; itemKey: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const scroll = (dir: number) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.8, behavior: "smooth" });
-  return (
-    <div className="group/shelf relative">
-      <div key={itemKey} ref={ref} className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 pt-2 sm:mx-0 sm:px-0">
-        {children}
-      </div>
-      {[-1, 1].map((dir) => (
-        <button
-          key={dir}
-          type="button"
-          onClick={() => scroll(dir)}
-          aria-label={dir < 0 ? "Scroll left" : "Scroll right"}
-          className={`absolute top-1/2 hidden size-10 -translate-y-1/2 place-items-center rounded-full bg-navy-950/80 text-white shadow-lg ring-1 ring-white/15 backdrop-blur transition hover:bg-navy-950 lg:grid ${
-            dir < 0 ? "-left-5" : "-right-5"
-          }`}
-        >
-          {dir < 0 ? <ChevronLeft className="size-5" /> : <ChevronRight className="size-5" />}
-        </button>
-      ))}
     </div>
   );
 }
@@ -183,17 +158,12 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
                 Where to <span className="font-script font-semibold text-sun-300">next?</span>
               </h1>
             </div>
-            <Link href="/tours" className="pointer-events-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15 backdrop-blur hover:bg-white/20">
+            <Link href="/tours" className="glass pointer-events-auto inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold text-white">
               Browse all trips <ChevronRight className="size-4" />
             </Link>
           </div>
 
-          <div className="relative mt-4">
-            <div
-              className="pointer-events-auto no-scrollbar -mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 py-1.5 sm:-mx-1.5 sm:px-1.5 [mask-image:linear-gradient(to_right,black_calc(100%_-_4rem),transparent)]"
-              role="tablist"
-              aria-label="Countries"
-            >
+          <ScrollRow className="pointer-events-auto mt-3" gap="gap-2.5" role="tablist" label="Countries">
               {countries.map((c) => {
                 const active = c.id === country.id;
                 return (
@@ -205,7 +175,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
                     onClick={() => pickCountry(c.id)}
                     className={`group relative h-16 w-32 shrink-0 snap-start overflow-hidden rounded-xl text-left transition-all duration-300 sm:h-[72px] sm:w-36 ${
                       active
-                        ? "shadow-2xl shadow-sun-500/25 ring-2 ring-sun-400"
+                        ? "ring-2 ring-sun-400"
                         : "opacity-70 ring-1 ring-white/15 hover:opacity-100"
                     }`}
                   >
@@ -222,8 +192,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
                   </button>
                 );
               })}
-            </div>
-          </div>
+          </ScrollRow>
         </div>
       </div>
 
@@ -237,7 +206,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
                   type="button"
                   onClick={() => pickArea(null)}
                   aria-label={`Back to all of ${country.name}`}
-                  className="pointer-events-auto grid size-8 place-items-center self-center rounded-full bg-white/10 text-sun-300 ring-1 ring-white/15 hover:bg-white/20"
+                  className="glass pointer-events-auto grid size-8 place-items-center self-center rounded-full text-sun-300"
                 >
                   <ArrowLeft className="size-4" />
                 </button>
@@ -273,7 +242,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
 
           <div className="pointer-events-auto mt-2">
             {!area ? (
-              <Shelf itemKey={`areas-${country.id}`}>
+              <ScrollRow resetKey={`areas-${country.id}`}>
                 {places.map((p, i) => (
                   <button
                     key={p.id}
@@ -297,14 +266,14 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
                       <span className="block text-base font-bold leading-tight">{p.name}</span>
                       <span className="mt-0.5 flex items-center gap-2 text-xs text-navy-100">
                         {p.count} {p.count === 1 ? "trip" : "trips"}
-                        {p.live && <span className="rounded-full bg-sun-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Dates open</span>}
+                        {p.live && <span className="glass-sun rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Dates open</span>}
                       </span>
                     </span>
                   </button>
                 ))}
-              </Shelf>
+              </ScrollRow>
             ) : (
-              <Shelf itemKey={`${area.id}-${sort}-${month ?? ""}`}>
+              <ScrollRow resetKey={`${area.id}-${sort}-${month ?? ""}`}>
                 {tours.map((t, i) => (
                   <Link
                     key={t.id}
@@ -340,7 +309,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
                 {tours.length === 0 && (
                   <p className="rounded-2xl bg-white/5 p-4 text-sm text-navy-100">No trips in that month. Try another month.</p>
                 )}
-              </Shelf>
+              </ScrollRow>
             )}
           </div>
 

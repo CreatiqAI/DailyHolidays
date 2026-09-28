@@ -10,7 +10,7 @@ export default function NotFound() {
         <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.3em] text-sun-300">Off the map</p>
         <h1 className="mt-2 text-4xl font-extrabold sm:text-5xl">We couldn&apos;t find that page</h1>
         <p className="mt-3 text-navy-200">The trip may have ended or moved. Browse our current tours instead.</p>
-        <Link href="/tours" className="mt-8 inline-flex rounded-full bg-sun-500 px-6 py-3 font-semibold text-white shadow-lg shadow-sun-500/25 hover:bg-sun-600">
+        <Link href="/tours" className="glass-sun mt-8 inline-flex rounded-full px-6 py-3 font-semibold text-white">
           See all tours
         </Link>
       </div>

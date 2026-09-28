@@ -56,7 +56,7 @@ export function EnquiryForm({
       <button
         type="submit"
         disabled={pending}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-sun-500 py-3 font-semibold text-white shadow-lg shadow-sun-500/25 transition hover:bg-sun-600 disabled:opacity-60"
+        className="glass-sun flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition disabled:opacity-60"
       >
         {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Send className="size-4" />} Send enquiry
       </button>

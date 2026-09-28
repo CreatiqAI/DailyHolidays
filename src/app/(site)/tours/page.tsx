@@ -128,7 +128,7 @@ export default async function ToursPage(props: PageProps<"/tours">) {
             <p className="text-xl font-bold">No trips match these filters</p>
             <p className="mt-2 text-navy-200">Try a different month or budget, or tell us what you have in mind and we&apos;ll plan it.</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link href="/tours" className="rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold ring-1 ring-white/15 hover:bg-white/20">
+              <Link href="/tours" className="glass rounded-full px-5 py-2.5 text-sm font-semibold">
                 Clear filters
               </Link>
               <a

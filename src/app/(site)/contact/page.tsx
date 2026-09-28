@@ -45,7 +45,7 @@ export default async function ContactPage() {
               <span><span className="block text-sm text-navy-200">WhatsApp</span><span className="font-semibold">+60 12-218 6990</span></span>
             </a>
             <a href={site.phoneHref} className="group flex items-center gap-4 rounded-3xl bg-sun-500/15 p-5 ring-1 ring-sun-400/40 transition hover:bg-sun-500/25">
-              <span className="grid size-12 place-items-center rounded-2xl bg-sun-500 text-white"><Phone className="size-6" /></span>
+              <span className="glass-sun grid size-12 place-items-center rounded-2xl text-white"><Phone className="size-6" /></span>
               <span><span className="block text-sm text-navy-200">Call the office</span><span className="font-semibold">{site.phone}</span></span>
             </a>
           </Reveal>

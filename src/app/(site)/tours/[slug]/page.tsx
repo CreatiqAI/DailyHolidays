@@ -98,10 +98,10 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
             )}
           </nav>
           <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-sun-500 px-3 py-1 text-xs font-semibold text-white shadow-lg shadow-sun-500/30">{tourTypeLabels[tour.tour_type] ?? "Tour"}</span>
-            {tour.code && <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/15 backdrop-blur">{tour.code}</span>}
+            <span className="glass-sun rounded-full px-3 py-1 text-xs font-semibold text-white">{tourTypeLabels[tour.tour_type] ?? "Tour"}</span>
+            {tour.code && <span className="glass rounded-full px-3 py-1 text-xs font-semibold text-white">{tour.code}</span>}
             {tour.departures.length > 0 && (
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/15 backdrop-blur">{tour.departures.length} upcoming dates</span>
+              <span className="glass rounded-full px-3 py-1 text-xs font-semibold text-white">{tour.departures.length} upcoming dates</span>
             )}
           </div>
           <h1 className="mt-4 max-w-4xl text-4xl font-extrabold leading-[1.05] sm:text-6xl">{tour.title}</h1>
@@ -116,14 +116,14 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <a href="#book" className="inline-flex items-center gap-2 rounded-full bg-sun-500 px-6 py-3 font-semibold text-white shadow-xl shadow-sun-500/30 transition hover:bg-sun-600">
+              <a href="#book" className="glass-sun inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white transition">
                 <CalendarDays className="size-4" /> Choose a date
               </a>
               <a
                 href={whatsappLink(`Hi Daily Holidays! I'm interested in "${tour.title}".`)}
                 target="_blank"
                 rel="noopener"
-                className="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-3 font-semibold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/20"
+                className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white transition"
               >
                 <WhatsAppIcon className="size-4" /> WhatsApp us
               </a>
@@ -131,7 +131,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           </div>
 
           {facts.length > 0 && (
-            <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/10 backdrop-blur-md sm:grid-cols-3 lg:grid-cols-5">
+            <dl className="glass mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl sm:grid-cols-3 lg:grid-cols-5">
               {facts.map((f) => (
                 <div key={f.label} className="bg-navy-950/40 p-4">
                   <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-navy-200">
@@ -259,7 +259,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
         <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6">
           <SectionHeading eyebrow="Keep exploring" title={`More trips in ${dest?.name ?? "the area"}`}>
             {country && (
-              <Link href={`/tours?destination=${country.slug}`} className="inline-flex items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/20">
+              <Link href={`/tours?destination=${country.slug}`} className="glass inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold text-white">
                 All {country.name} trips <ChevronRight className="size-4" />
               </Link>
             )}

@@ -71,7 +71,7 @@ export function StickyBookBar({
         <a
           href={`#${bookId}`}
           tabIndex={show ? 0 : -1}
-          className="flex shrink-0 items-center gap-2 rounded-xl bg-sun-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sun-500/30 hover:bg-sun-600"
+          className="glass-sun flex shrink-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white"
         >
           <CalendarDays className="size-4" /> Choose a date
         </a>

@@ -43,10 +43,10 @@ export default async function AboutPage() {
         subtitle={<>{site.legalName} · {site.chineseName}</>}
       >
         <div className="mt-6 flex flex-wrap gap-3">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium ring-1 ring-white/15 backdrop-blur">
+          <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
             <BadgeCheck className="size-4 text-sun-300" /> Licensed: {site.licence}
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium ring-1 ring-white/15 backdrop-blur">
+          <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium">
             <BadgeCheck className="size-4 text-sun-300" /> Company no. {site.companyNo}
           </span>
         </div>
@@ -101,10 +101,10 @@ export default async function AboutPage() {
             <p className="mt-1 text-navy-200">Browse the trips or tell us what you have in mind.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/tours" className="inline-flex items-center gap-2 rounded-full bg-sun-500 px-6 py-3 font-semibold text-white shadow-lg shadow-sun-500/25 hover:bg-sun-600">
+            <Link href="/tours" className="glass-sun inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white">
               Browse trips <ArrowRight className="size-4" />
             </Link>
-            <Link href="/contact" className="rounded-full bg-white/10 px-6 py-3 font-semibold ring-1 ring-white/15 hover:bg-white/20">
+            <Link href="/contact" className="glass rounded-full px-6 py-3 font-semibold">
               Contact us
             </Link>
           </div>

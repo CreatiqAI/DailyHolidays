@@ -62,7 +62,7 @@ export function BookingPanel({
                     aria-selected={active}
                     onClick={() => setMonth(m)}
                     className={`shrink-0 rounded-2xl px-4 py-2.5 text-left transition ${
-                      active ? "bg-sun-500 text-white shadow-lg shadow-sun-500/25" : "bg-white/5 text-white ring-1 ring-white/10 hover:bg-white/10"
+                      active ? "glass-sun" : "glass"
                     }`}
                   >
                     <span className="block text-sm font-bold">{formatMonth(`${m}-01`)}</span>
@@ -89,7 +89,7 @@ export function BookingPanel({
                     }`}
                   >
                     {isSel && (
-                      <span className="absolute right-3 top-3 grid size-5 place-items-center rounded-full bg-sun-500">
+                      <span className="glass-sun absolute right-3 top-3 grid size-5 place-items-center rounded-full">
                         <Check className="size-3.5 text-white" />
                       </span>
                     )}

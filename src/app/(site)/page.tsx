@@ -50,7 +50,7 @@ export default async function HomePage() {
       {/* UPCOMING */}
       <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6">
         <SectionHeading eyebrow="Departing soon" title="Upcoming trips">
-          <Link href="/tours" className="inline-flex items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/20">
+          <Link href="/tours" className="glass inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold text-white">
             See all trips <ArrowRight className="size-4" />
           </Link>
         </SectionHeading>
@@ -76,7 +76,7 @@ export default async function HomePage() {
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 90}>
               <div className="group h-full rounded-3xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-7 ring-1 ring-white/10 transition hover:ring-sun-400/40">
-                <span className="grid size-12 place-items-center rounded-2xl bg-sun-500/15 text-sun-300 ring-1 ring-sun-400/30 transition group-hover:bg-sun-500 group-hover:text-white">
+                <span className="grid size-12 place-items-center rounded-2xl bg-sun-500/15 text-sun-300 ring-1 ring-sun-400/30 transition group-hover:bg-sun-500/30 group-hover:text-sun-100">
                   <f.icon className="size-6" />
                 </span>
                 <h3 className="mt-6 text-lg font-bold text-white">{f.title}</h3>
@@ -134,7 +134,7 @@ export default async function HomePage() {
             >
               <WhatsAppIcon className="size-5" /> WhatsApp us
             </a>
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-3 font-semibold ring-1 ring-white/25 backdrop-blur hover:bg-white/20">
+            <Link href="/contact" className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold">
               Send an enquiry
             </Link>
           </div>

@@ -34,7 +34,7 @@ export function TourCard({ tour, priority = false }: { tour: TourCardData; prior
           {tourTypeLabels[tour.tour_type] ?? "Tour"}
         </span>
         {tour.departure_count > 0 && (
-          <span className="rounded-full bg-sun-500 px-3 py-1 text-[11px] font-bold text-white shadow-lg shadow-sun-500/30">
+          <span className="glass-sun rounded-full px-3 py-1 text-[11px] font-bold text-white">
             {tour.departure_count} {tour.departure_count === 1 ? "date" : "dates"}
           </span>
         )}
@@ -63,7 +63,7 @@ export function TourCard({ tour, priority = false }: { tour: TourCardData; prior
           ) : (
             <span className="text-sm font-medium text-navy-100">Price on request</span>
           )}
-          <span className="grid size-9 place-items-center rounded-full bg-white/10 text-white ring-1 ring-white/15 transition group-hover:bg-sun-500 group-hover:ring-sun-400">
+          <span className="glass grid size-9 place-items-center rounded-full transition group-hover:bg-sun-500/40">
             →
           </span>
         </span>

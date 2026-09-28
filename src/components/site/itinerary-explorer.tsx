@@ -59,12 +59,12 @@ function StopSheet({ stop, day, onClose, onShowOnMap }: { stop: Stop; day: numbe
           {stop.description && <p className="leading-relaxed text-navy-100">{stop.description}</p>}
           <div className="flex flex-wrap items-center gap-3 pt-2">
             {onShowOnMap && stop.lat != null && (
-              <button type="button" onClick={onShowOnMap} className="inline-flex items-center gap-2 rounded-full bg-sun-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sun-600">
+              <button type="button" onClick={onShowOnMap} className="glass-sun inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white">
                 <MapPin className="size-4" /> Show on map
               </button>
             )}
             {stop.info_source_url && (
-              <a href={stop.info_source_url} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/20">
+              <a href={stop.info_source_url} target="_blank" rel="noopener" className="glass inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white">
                 Read more <ExternalLink className="size-3.5" />
               </a>
             )}
@@ -176,8 +176,8 @@ export function ItineraryExplorer({ days }: { days: ItineraryDay[] }) {
                 type="button"
                 onClick={() => goToDay(d.day_number)}
                 aria-label={`Show day ${d.day_number} on the map`}
-                className={`absolute left-0 top-5 grid size-14 place-items-center rounded-2xl text-center ring-1 transition duration-300 ${
-                  active ? "bg-sun-500 text-white shadow-lg shadow-sun-500/30 ring-sun-400" : "bg-navy-900 text-white ring-white/15 hover:ring-white/40"
+                className={`absolute left-0 top-5 grid size-14 place-items-center rounded-2xl text-center transition duration-300 ${
+                  active ? "glass-sun" : "bg-navy-900 text-white ring-1 ring-white/15 hover:ring-white/40"
                 }`}
               >
                 <span className="text-[9px] font-semibold uppercase tracking-widest opacity-80">Day</span>
