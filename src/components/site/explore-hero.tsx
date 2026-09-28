@@ -135,7 +135,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
   };
 
   return (
-    <section className="relative isolate h-[100svh] min-h-[760px] overflow-hidden bg-navy-950 text-white">
+    <section data-hero className="relative isolate h-[100svh] min-h-[760px] overflow-hidden bg-navy-950 text-white">
       <HeroBackdrop image={country.image} />
 
       <CountryMap

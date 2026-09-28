@@ -124,11 +124,11 @@ export default async function ToursPage(props: PageProps<"/tours">) {
             ))}
           </div>
         ) : (
-          <Reveal className="rounded-3xl bg-white/[0.04] p-12 text-center ring-1 ring-white/10">
+          <Reveal className="rounded-3xl bg-white shadow-sm p-12 text-center ring-1 ring-navy-100">
             <p className="text-xl font-bold">No trips match these filters</p>
-            <p className="mt-2 text-navy-200">Try a different month or budget, or tell us what you have in mind and we&apos;ll plan it.</p>
+            <p className="mt-2 text-navy-500">Try a different month or budget, or tell us what you have in mind and we&apos;ll plan it.</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link href="/tours" className="glass rounded-full px-5 py-2.5 text-sm font-semibold">
+              <Link href="/tours" className="glass-light rounded-full px-5 py-2.5 text-sm font-semibold">
                 Clear filters
               </Link>
               <a

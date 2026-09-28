@@ -3,14 +3,14 @@ import { Fragment, type ReactNode } from "react";
 /** Minimal markdown: ## headings, - lists, **bold**, paragraphs. Enough for tour descriptions. */
 function inline(text: string): ReactNode[] {
   return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-    part.startsWith("**") && part.endsWith("**") ? <strong key={i} className="text-white">{part.slice(2, -2)}</strong> : <Fragment key={i}>{part}</Fragment>,
+    part.startsWith("**") && part.endsWith("**") ? <strong key={i} className="text-navy-950">{part.slice(2, -2)}</strong> : <Fragment key={i}>{part}</Fragment>,
   );
 }
 
 export function RichText({ text }: { text: string }) {
   const blocks = text.replace(/\r\n/g, "\n").split(/\n{2,}/);
   return (
-    <div className="space-y-4 text-navy-100">
+    <div className="space-y-4 text-navy-700">
       {blocks.map((block, i) => {
         const lines = block.split("\n").filter((l) => l.trim());
         if (!lines.length) return null;
@@ -23,7 +23,7 @@ export function RichText({ text }: { text: string }) {
         }
         const h = lines[0].match(/^#{1,4}\s+(.*)/);
         if (h && lines.length === 1) {
-          return <h3 key={i} className="pt-2 text-lg font-semibold text-white">{inline(h[1])}</h3>;
+          return <h3 key={i} className="pt-2 text-lg font-semibold text-navy-950">{inline(h[1])}</h3>;
         }
         return (
           <p key={i} className="whitespace-pre-line leading-relaxed">

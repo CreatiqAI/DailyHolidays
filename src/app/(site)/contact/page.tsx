@@ -42,38 +42,38 @@ export default async function ContactPage() {
               className="group flex items-center gap-4 rounded-3xl bg-[#25D366]/15 p-5 ring-1 ring-[#25D366]/40 transition hover:bg-[#25D366]/25"
             >
               <span className="grid size-12 place-items-center rounded-2xl bg-[#25D366] text-white"><WhatsAppIcon className="size-6" /></span>
-              <span><span className="block text-sm text-navy-200">WhatsApp</span><span className="font-semibold">+60 12-218 6990</span></span>
+              <span><span className="block text-sm text-navy-500">WhatsApp</span><span className="font-semibold">+60 12-218 6990</span></span>
             </a>
             <a href={site.phoneHref} className="group flex items-center gap-4 rounded-3xl bg-sun-500/15 p-5 ring-1 ring-sun-400/40 transition hover:bg-sun-500/25">
               <span className="glass-sun grid size-12 place-items-center rounded-2xl text-white"><Phone className="size-6" /></span>
-              <span><span className="block text-sm text-navy-200">Call the office</span><span className="font-semibold">{site.phone}</span></span>
+              <span><span className="block text-sm text-navy-500">Call the office</span><span className="font-semibold">{site.phone}</span></span>
             </a>
           </Reveal>
 
-          <Reveal delay={80} className="rounded-3xl bg-white/[0.04] p-6 ring-1 ring-white/10">
-            <ul className="space-y-4 text-sm text-navy-100">
-              <li className="flex gap-3"><MapPin className="mt-0.5 size-5 shrink-0 text-sun-300" /><span>{site.address.map((l) => <span key={l} className="block">{l}</span>)}</span></li>
-              <li className="flex gap-3"><Mail className="size-5 shrink-0 text-sun-300" /><a href={`mailto:${site.email}`} className="hover:text-white hover:underline">{site.email}</a></li>
-              <li className="flex gap-3"><Printer className="size-5 shrink-0 text-sun-300" />Fax {site.fax}</li>
+          <Reveal delay={80} className="rounded-3xl bg-white shadow-sm p-6 ring-1 ring-navy-100">
+            <ul className="space-y-4 text-sm text-navy-700">
+              <li className="flex gap-3"><MapPin className="mt-0.5 size-5 shrink-0 text-sun-600" /><span>{site.address.map((l) => <span key={l} className="block">{l}</span>)}</span></li>
+              <li className="flex gap-3"><Mail className="size-5 shrink-0 text-sun-600" /><a href={`mailto:${site.email}`} className="hover:text-navy-950 hover:underline">{site.email}</a></li>
+              <li className="flex gap-3"><Printer className="size-5 shrink-0 text-sun-600" />Fax {site.fax}</li>
             </ul>
           </Reveal>
 
-          <Reveal delay={160} className="overflow-hidden rounded-3xl ring-1 ring-white/10">
+          <Reveal delay={160} className="overflow-hidden rounded-3xl ring-1 ring-navy-100">
             <iframe
               title="Daily Holidays office map"
               src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${office.lat},${office.lng}`}
-              className="h-72 w-full [filter:invert(0.9)_hue-rotate(180deg)_saturate(0.8)_brightness(0.95)]"
+              className="h-72 w-full"
               loading="lazy"
             />
-            <a href={directions} target="_blank" rel="noopener" className="flex items-center justify-center gap-2 bg-white/[0.06] py-3 text-sm font-semibold text-white hover:bg-white/10">
-              <Navigation className="size-4 text-sun-300" /> Get directions
+            <a href={directions} target="_blank" rel="noopener" className="flex items-center justify-center gap-2 bg-navy-50 py-3 text-sm font-semibold text-navy-950 hover:bg-navy-100">
+              <Navigation className="size-4 text-sun-600" /> Get directions
             </a>
           </Reveal>
         </div>
 
-        <Reveal delay={100} className="rounded-3xl bg-gradient-to-b from-white/[0.09] to-white/[0.03] p-6 ring-1 ring-white/10 backdrop-blur sm:p-8">
+        <Reveal delay={100} className="rounded-3xl bg-gradient-to-b from-white to-sand-50 p-6 ring-1 ring-navy-100 backdrop-blur sm:p-8">
           <h2 className="text-2xl font-extrabold">Send an enquiry</h2>
-          <p className="mb-6 mt-1 text-sm text-navy-200">Tell us where you&apos;d like to go, when, and how many are travelling.</p>
+          <p className="mb-6 mt-1 text-sm text-navy-500">Tell us where you&apos;d like to go, when, and how many are travelling.</p>
           <EnquiryForm />
         </Reveal>
       </section>

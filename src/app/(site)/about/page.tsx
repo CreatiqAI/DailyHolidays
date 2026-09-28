@@ -53,9 +53,9 @@ export default async function AboutPage() {
       </PageHero>
 
       <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 pt-20 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center">
-        <Reveal className="space-y-5 text-lg leading-relaxed text-navy-100">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sun-300">Who we are</p>
-          <p className="text-2xl font-bold leading-snug text-white sm:text-3xl">
+        <Reveal className="space-y-5 text-lg leading-relaxed text-navy-700">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sun-600">Who we are</p>
+          <p className="text-2xl font-bold leading-snug text-navy-950 sm:text-3xl">
             A Malaysian travel agency in Batu Caves, taking travellers across Asia, Europe, the Middle East and beyond.
           </p>
           <p>
@@ -68,7 +68,7 @@ export default async function AboutPage() {
         {strip.length > 0 && (
           <Reveal delay={120} className="grid grid-cols-3 gap-3">
             {strip.map((img, i) => (
-              <div key={img.url} className={`relative overflow-hidden rounded-2xl ring-1 ring-white/10 ${i % 3 === 1 ? "mt-8" : ""} aspect-[3/4]`}>
+              <div key={img.url} className={`relative overflow-hidden rounded-2xl ring-1 ring-navy-100 ${i % 3 === 1 ? "mt-8" : ""} aspect-[3/4]`}>
                 <Image src={img.url} alt={img.name} fill sizes="(min-width: 1024px) 15vw, 30vw" className="object-cover" />
                 <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950/90 to-transparent p-2 text-xs font-semibold">{img.name}</span>
               </div>
@@ -82,12 +82,12 @@ export default async function AboutPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s, i) => (
             <Reveal key={s.title} delay={(i % 3) * 70}>
-              <div className="h-full rounded-3xl bg-white/[0.04] p-6 ring-1 ring-white/10 transition hover:bg-white/[0.07] hover:ring-sun-400/40">
+              <div className="h-full rounded-3xl bg-white shadow-sm p-6 ring-1 ring-navy-100 transition hover:shadow-md hover:ring-sun-400/40">
                 <span className="grid size-11 place-items-center rounded-2xl bg-sun-500/15 text-sun-300 ring-1 ring-sun-400/30">
                   <s.icon className="size-5" />
                 </span>
-                <h3 className="mt-5 font-bold text-white">{s.title}</h3>
-                <p className="mt-1.5 text-sm text-navy-200">{s.body}</p>
+                <h3 className="mt-5 font-bold text-navy-950">{s.title}</h3>
+                <p className="mt-1.5 text-sm text-navy-500">{s.body}</p>
               </div>
             </Reveal>
           ))}
@@ -95,16 +95,16 @@ export default async function AboutPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
-        <Reveal className="flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-gradient-to-r from-white/[0.08] to-white/[0.02] p-8 ring-1 ring-white/10">
+        <Reveal className="flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-gradient-to-r from-white to-sand-50 p-8 ring-1 ring-navy-100">
           <div>
             <h2 className="text-2xl font-extrabold">Ready to go somewhere?</h2>
-            <p className="mt-1 text-navy-200">Browse the trips or tell us what you have in mind.</p>
+            <p className="mt-1 text-navy-500">Browse the trips or tell us what you have in mind.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/tours" className="glass-sun inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white">
               Browse trips <ArrowRight className="size-4" />
             </Link>
-            <Link href="/contact" className="glass rounded-full px-6 py-3 font-semibold">
+            <Link href="/contact" className="glass-light rounded-full px-6 py-3 font-semibold">
               Contact us
             </Link>
           </div>

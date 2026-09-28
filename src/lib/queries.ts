@@ -180,3 +180,37 @@ export async function getHeroImages() {
     .filter((d) => !d.parent_id && d.cover_image_url?.includes("/hero/"))
     .map((d) => ({ name: d.name, url: d.cover_image_url! }));
 }
+
+/** A tour to showcase on the home page: the soonest departing one that has an itinerary, dates and mapped stops. */
+export async function getFeaturedTour() {
+  for (const t of (await listTours({}, 12)).filter((t) => t.departure_count > 0)) {
+    const tour = await getTour(t.slug);
+    if (tour && tour.days.length >= 3 && tour.days.some((d) => d.places.some((p) => p.lat != null))) return tour;
+  }
+  return null;
+}
+
+/** Live numbers for the home page. */
+export async function getHomeStats() {
+  const supabase = createPublicClient();
+  const today = todayISO();
+  const [tours, destinations, { count: departures }, { count: stops }] = await Promise.all([
+    listTours({}),
+    getDestinations(),
+    supabase
+      .from("tour_departures")
+      .select("id, tours!inner(status)", { count: "exact", head: true })
+      .gte("departure_date", today)
+      .eq("tours.status", "published"),
+    supabase.from("places").select("id", { count: "exact", head: true }).not("lat", "is", null),
+  ]);
+  const countryIds = new Set(
+    tours.map((t) => t.destination?.parent_id ?? t.destination?.id).filter((id): id is string => !!id),
+  );
+  return {
+    tours: tours.length,
+    countries: destinations.filter((d) => countryIds.has(d.id)).length,
+    departures: departures ?? 0,
+    stops: stops ?? 0,
+  };
+}

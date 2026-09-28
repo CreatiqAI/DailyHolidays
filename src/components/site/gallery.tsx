@@ -40,7 +40,7 @@ export function Gallery({ images, title }: { images: Img[]; title: string }) {
             key={img.id}
             type="button"
             onClick={() => setOpen(i)}
-            className={`group relative overflow-hidden rounded-2xl bg-navy-800 ring-1 ring-white/10 ${i === 0 ? "col-span-2 row-span-2" : ""}`}
+            className={`group relative overflow-hidden rounded-2xl bg-navy-100 ring-1 ring-navy-100 ${i === 0 ? "col-span-2 row-span-2" : ""}`}
           >
             <Image
               src={img.url}

@@ -64,7 +64,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   return (
     <article>
       {/* HERO */}
-      <section id="tour-hero" className="relative isolate flex min-h-[88svh] items-end overflow-hidden">
+      <section id="tour-hero" data-hero className="relative isolate flex min-h-[88svh] items-end overflow-hidden text-white">
         <div className="absolute inset-0 -z-10 overflow-hidden bg-navy-950">
           {hero ? (
             <div className="hero-bg absolute inset-0">
@@ -155,9 +155,9 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {tour.highlights.map((h, i) => (
               <Reveal key={h} delay={i * 70}>
-                <div className="flex h-full gap-4 rounded-3xl bg-white/[0.04] p-5 ring-1 ring-white/10 transition hover:bg-white/[0.07] hover:ring-sun-400/40">
+                <div className="flex h-full gap-4 rounded-3xl bg-white shadow-sm p-5 ring-1 ring-navy-100 transition hover:shadow-md hover:ring-sun-400/40">
                   <span className="text-2xl font-extrabold text-sun-400/80">{String(i + 1).padStart(2, "0")}</span>
-                  <p className="pt-1 font-medium leading-snug text-white">{h}</p>
+                  <p className="pt-1 font-medium leading-snug text-navy-950">{h}</p>
                 </div>
               </Reveal>
             ))}
@@ -169,7 +169,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       {tour.days.length > 0 ? (
         <section id="itinerary" className="mx-auto max-w-7xl px-4 pt-24 sm:px-6">
           <SectionHeading eyebrow="Day by day" title="Your journey">
-            <p className="max-w-sm text-sm text-navy-200">Scroll through the days: the map follows along. Tap a day number to jump to it.</p>
+            <p className="max-w-sm text-sm text-navy-500">Scroll through the days: the map follows along. Tap a day number to jump to it.</p>
           </SectionHeading>
           <ItineraryExplorer days={tour.days} />
         </section>
@@ -177,7 +177,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
         tour.description && (
           <section className="mx-auto max-w-4xl px-4 pt-24 sm:px-6">
             <SectionHeading eyebrow="The trip" title="About this trip" />
-            <Reveal className="rounded-3xl bg-white/[0.04] p-6 ring-1 ring-white/10 sm:p-8">
+            <Reveal className="rounded-3xl bg-white shadow-sm p-6 ring-1 ring-navy-100 sm:p-8">
               <RichText text={tour.description} />
             </Reveal>
           </section>
@@ -198,21 +198,21 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
           <SectionHeading eyebrow="The fine print" title="What's included" />
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {tour.inclusions.length > 0 && (
-              <Reveal className="rounded-3xl bg-white/[0.04] p-6 ring-1 ring-white/10">
-                <h3 className="flex items-center gap-2 font-semibold text-white"><span className="grid size-7 place-items-center rounded-full bg-emerald-500/20"><Check className="size-4 text-emerald-300" /></span> Included</h3>
-                <ul className="mt-4 space-y-2.5 text-sm text-navy-100">
+              <Reveal className="rounded-3xl bg-white shadow-sm p-6 ring-1 ring-navy-100">
+                <h3 className="flex items-center gap-2 font-semibold text-navy-950"><span className="grid size-7 place-items-center rounded-full bg-emerald-500/20"><Check className="size-4 text-emerald-600" /></span> Included</h3>
+                <ul className="mt-4 space-y-2.5 text-sm text-navy-700">
                   {tour.inclusions.map((x) => (
-                    <li key={x} className="flex gap-2.5"><Check className="mt-0.5 size-4 shrink-0 text-emerald-300" /> {x}</li>
+                    <li key={x} className="flex gap-2.5"><Check className="mt-0.5 size-4 shrink-0 text-emerald-600" /> {x}</li>
                   ))}
                 </ul>
               </Reveal>
             )}
             {tour.exclusions.length > 0 && (
-              <Reveal delay={100} className="rounded-3xl bg-white/[0.04] p-6 ring-1 ring-white/10">
-                <h3 className="flex items-center gap-2 font-semibold text-white"><span className="grid size-7 place-items-center rounded-full bg-white/10"><Minus className="size-4 text-navy-200" /></span> Not included</h3>
-                <ul className="mt-4 space-y-2.5 text-sm text-navy-100">
+              <Reveal delay={100} className="rounded-3xl bg-white shadow-sm p-6 ring-1 ring-navy-100">
+                <h3 className="flex items-center gap-2 font-semibold text-navy-950"><span className="grid size-7 place-items-center rounded-full bg-navy-50"><Minus className="size-4 text-navy-500" /></span> Not included</h3>
+                <ul className="mt-4 space-y-2.5 text-sm text-navy-700">
                   {tour.exclusions.map((x) => (
-                    <li key={x} className="flex gap-2.5"><Minus className="mt-0.5 size-4 shrink-0 text-navy-300" /> {x}</li>
+                    <li key={x} className="flex gap-2.5"><Minus className="mt-0.5 size-4 shrink-0 text-navy-400" /> {x}</li>
                   ))}
                 </ul>
               </Reveal>
@@ -242,14 +242,14 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
                   href={p.url}
                   target="_blank"
                   rel="noopener"
-                  className="group flex items-center gap-4 rounded-2xl bg-white/[0.04] p-4 ring-1 ring-white/10 transition hover:bg-white/[0.08] hover:ring-sun-400/50"
+                  className="group flex items-center gap-4 rounded-2xl bg-white shadow-sm p-4 ring-1 ring-navy-100 transition hover:shadow-md hover:ring-sun-400/50"
                 >
-                  <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-red-500/15 text-red-300"><FileText className="size-6" /></span>
+                  <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-red-500/15 text-red-600"><FileText className="size-6" /></span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold text-white">{p.caption ?? "Itinerary (PDF)"}</span>
-                    <span className="text-xs text-navy-200">PDF with full terms and conditions</span>
+                    <span className="block truncate text-sm font-semibold text-navy-950">{p.caption ?? "Itinerary (PDF)"}</span>
+                    <span className="text-xs text-navy-500">PDF with full terms and conditions</span>
                   </span>
-                  <Download className="size-5 text-navy-300 transition group-hover:translate-y-0.5 group-hover:text-sun-300" />
+                  <Download className="size-5 text-navy-400 transition group-hover:translate-y-0.5 group-hover:text-sun-600" />
                 </a>
               </Reveal>
             ))}
@@ -262,7 +262,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
         <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6">
           <SectionHeading eyebrow="Keep exploring" title={`More trips in ${dest?.name ?? "the area"}`}>
             {country && (
-              <Link href={`/tours?destination=${country.slug}`} className="glass inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold text-white">
+              <Link href={`/tours?destination=${country.slug}`} className="glass-light inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold text-navy-950">
                 All {country.name} trips <ChevronRight className="size-4" />
               </Link>
             )}

@@ -50,13 +50,13 @@ export function StickyBookBar({
       className={`fixed inset-x-0 bottom-0 z-40 transition duration-500 ${show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"}`}
       aria-hidden={!show}
     >
-      <div className="mx-3 mb-3 flex max-w-5xl items-center gap-3 rounded-2xl bg-navy-900/85 p-3 pl-5 shadow-2xl shadow-black/50 ring-1 ring-white/15 backdrop-blur-xl sm:mx-auto sm:mb-5">
+      <div className="mx-3 mb-3 flex max-w-5xl items-center gap-3 rounded-2xl bg-white/85 p-3 pl-5 shadow-2xl shadow-navy-900/20 ring-1 ring-navy-100 backdrop-blur-xl sm:mx-auto sm:mb-5">
         <div className="min-w-0 flex-1">
-          <p className="hidden truncate text-sm font-semibold text-white sm:block">{title}</p>
-          <p className="text-xs text-navy-200">
+          <p className="hidden truncate text-sm font-semibold text-navy-950 sm:block">{title}</p>
+          <p className="text-xs text-navy-500">
             {priceFrom ? (
               <>
-                from <span className="text-base font-bold text-sun-300">{formatRM(priceFrom, { compact: true })}</span>
+                from <span className="text-base font-bold text-sun-600">{formatRM(priceFrom, { compact: true })}</span>
               </>
             ) : (
               "Price on request"

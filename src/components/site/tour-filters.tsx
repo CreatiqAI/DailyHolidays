@@ -4,6 +4,7 @@ import Form from "next/form";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { Dropdown } from "./dropdown";
 
 type Option = { value: string; label: string };
 
@@ -24,33 +25,25 @@ export function TourFilters({ values, destinations, regions, months, types }: Pr
   const [open, setOpen] = useState(false);
 
   const select = (name: string, label: string, options: Option[], any: string) => (
-    <label className="block min-w-0">
-      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.2em] text-navy-200">{label}</span>
-      <select name={name} defaultValue={values[name] ?? ""} onChange={submit} className={`field-dark ${values[name] ? "border-sun-400/70" : ""}`}>
-        <option value="">{any}</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-    </label>
+    <Dropdown key={`${name}-${values[name] ?? ""}`} name={name} label={label} options={options} placeholder={any} defaultValue={values[name] ?? ""} onChange={submit} />
   );
 
   return (
-    <Form ref={formRef} action="/tours" className="rounded-3xl bg-navy-900/70 p-4 shadow-2xl shadow-black/40 ring-1 ring-white/10 backdrop-blur-xl sm:p-5">
+    <Form ref={formRef} action="/tours" className="rounded-3xl bg-white/90 p-4 shadow-2xl shadow-navy-900/15 ring-1 ring-navy-100 backdrop-blur-xl sm:p-5">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(6,minmax(0,1fr))]">
         <div className="col-span-2 flex items-end gap-2 lg:col-span-1">
           <label className="block min-w-0 flex-1">
-            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.2em] text-navy-200">Search</span>
+            <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.2em] text-navy-500">Search</span>
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-navy-300" />
-              <input name="q" defaultValue={values.q ?? ""} placeholder="Hainan, Japan, cruise…" className="field-dark pl-9" />
+              <input name="q" defaultValue={values.q ?? ""} placeholder="Hainan, Japan, cruise…" className="field pl-9" />
             </div>
           </label>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="glass inline-flex h-[42px] shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold sm:hidden"
+            className="glass-light inline-flex h-[42px] shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold sm:hidden"
           >
             <SlidersHorizontal className="size-4" /> Filters
             {activeCount > 0 && <span className="grid size-5 place-items-center rounded-full bg-sun-500 text-[11px] font-bold">{activeCount}</span>}
@@ -87,7 +80,7 @@ export function TourFilters({ values, destinations, regions, months, types }: Pr
       </div>
       <div className={`mt-3 items-center justify-end gap-2 ${open ? "flex" : "hidden"} sm:flex`}>
         {active && (
-          <Link href="/tours" className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-navy-100 hover:bg-white/10">
+          <Link href="/tours" className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-navy-700 hover:bg-navy-100">
             <X className="size-4" /> Clear filters
           </Link>
         )}

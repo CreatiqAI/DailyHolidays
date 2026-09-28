@@ -18,7 +18,7 @@ export function PageHero({
   size?: "md" | "lg";
 }) {
   return (
-    <section className={`relative isolate flex items-end overflow-hidden ${size === "lg" ? "min-h-[70svh]" : "min-h-[52svh]"}`}>
+    <section data-hero className={`relative isolate flex items-end overflow-hidden text-white ${size === "lg" ? "min-h-[70svh]" : "min-h-[52svh]"}`}>
       <div className="absolute inset-0 -z-10 overflow-hidden bg-navy-950">
         {image && (
           <div className="hero-bg absolute inset-0">
