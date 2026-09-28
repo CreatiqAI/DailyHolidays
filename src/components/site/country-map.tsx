@@ -2,12 +2,12 @@
 
 import { geoMercator, geoPath } from "d3-geo";
 import { select } from "d3-selection";
-import { tile as d3tile } from "d3-tile";
 import "d3-transition";
 import { zoom, zoomIdentity, type ZoomBehavior, type ZoomTransform } from "d3-zoom";
 import type { Feature, Geometry, MultiLineString } from "geojson";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { satelliteTiles } from "./satellite";
 
 export type MapPin = {
   id: string;
@@ -21,10 +21,6 @@ export type MapPin = {
 export type MapSpot = { name: string; lat: number; lng: number };
 export type FitPadding = { top: number; right: number; bottom: number; left: number };
 
-// Satellite imagery inside the country outline. Esri World Imagery, attribution shown by the parent.
-const tileUrl = (x: number, y: number, z: number) =>
-  `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
-const TILE_MAX_Z = 18;
 const FLY_ZOOM = 3.2; // zoom applied when a place is selected
 const SPOTS_FROM = 1.9; // zoom level at which itinerary stops appear
 const SPOT_LABELS_FROM = 2.8;
@@ -268,42 +264,8 @@ export function CountryMap({
     });
   }, [projection, spots]);
 
-  // satellite tiles, positioned in screen space for the current zoom
-  const tiles = useMemo(() => {
-    if (!projection || !w || !h) return [];
-    const S = projection.scale();
-    const [X, Y] = projection.translate();
-    const tiler = d3tile()
-      .extent([[0, 0], [w, h]])
-      .tileSize(256)
-      .clampX(false)
-      .zoomDelta(typeof window !== "undefined" && window.devicePixelRatio > 1.5 ? 1 : 0);
-    const list = tiler(zoomIdentity.translate(t.x + t.k * X, t.y + t.k * Y).scale(t.k * 2 * Math.PI * S));
-    const [tx, ty] = list.translate;
-    const z = list[0]?.[2] ?? 0;
-    const d = Math.max(0, z - TILE_MAX_Z); // beyond the imagery's max zoom, stretch parent tiles
-    const out: { key: string; url: string; x: number; y: number; size: number }[] = [];
-    const seen = new Set<string>();
-    for (const [x, y] of list) {
-      const px = x >> d;
-      const py = y >> d;
-      const pz = z - d;
-      const key = `${pz}/${px}/${py}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const n = 2 ** pz;
-      const wx = ((px % n) + n) % n;
-      if (py < 0 || py >= n) continue;
-      out.push({
-        key,
-        url: tileUrl(wx, py, pz),
-        x: (px * 2 ** d + tx) * list.scale,
-        y: (py * 2 ** d + ty) * list.scale,
-        size: list.scale * 2 ** d,
-      });
-    }
-    return out;
-  }, [projection, w, h, t]);
+  // satellite imagery, clipped to the country below
+  const tiles = useMemo(() => (projection && w && h ? satelliteTiles(projection, w, h, t) : []), [projection, w, h, t]);
 
   const showSpots = t.k >= SPOTS_FROM;
   const visibleSpots = useMemo(() => {

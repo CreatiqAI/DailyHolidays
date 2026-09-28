@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Check } from "lucide-react";
 import { formatDate, formatMonth, formatRM } from "@/lib/format";
 import { whatsappLink } from "@/lib/site";
 import { EnquiryForm } from "./enquiry-form";
@@ -11,6 +11,7 @@ type Departure = { id: string; departure_date: string; price_myr: number | null;
 
 const statusLabel: Record<string, string> = { limited: "Few seats", full: "Full" };
 
+/** "Choose your date": month tabs and date cards on the left, the enquiry form on the right. */
 export function BookingPanel({
   tourId,
   tourTitle,
@@ -22,88 +23,114 @@ export function BookingPanel({
   priceFrom: number | null;
   departures: Departure[];
 }) {
+  const months = useMemo(() => [...new Set(departures.map((d) => d.departure_date.slice(0, 7)))], [departures]);
+  const [month, setMonth] = useState(months[0] ?? null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = departures.find((d) => d.id === selectedId) ?? null;
-
-  const byMonth = useMemo(() => {
-    const groups = new Map<string, Departure[]>();
-    for (const d of departures) {
-      const key = d.departure_date.slice(0, 7);
-      groups.set(key, [...(groups.get(key) ?? []), d]);
-    }
-    return [...groups.entries()];
-  }, [departures]);
+  const inMonth = departures.filter((d) => d.departure_date.startsWith(month ?? "#"));
+  const cheapest = (m: string) => {
+    const prices = departures.filter((d) => d.departure_date.startsWith(m) && d.price_myr != null).map((d) => d.price_myr!);
+    return prices.length ? Math.min(...prices) : null;
+  };
 
   const message = selected
     ? `I'm interested in "${tourTitle}" departing ${formatDate(selected.departure_date, "long")}.`
     : `I'm interested in "${tourTitle}".`;
 
   return (
-    <div className="space-y-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-navy-100">
-      <div>
-        <p className="text-sm text-navy-500">{priceFrom ? "From" : "Price"}</p>
-        <p className="text-3xl font-bold text-navy-900">
-          {formatRM(priceFrom, { compact: true }) ?? "On request"}
-          {priceFrom ? <span className="text-sm font-normal text-navy-500"> / person</span> : null}
-        </p>
-      </div>
-
-      <div>
-        <p className="mb-2 flex items-center gap-2 text-sm font-semibold text-navy-900">
-          <CalendarDays className="size-4 text-sun-500" /> Choose a departure date
-        </p>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="rounded-3xl bg-white/[0.04] p-5 ring-1 ring-white/10 backdrop-blur sm:p-7">
         {departures.length === 0 ? (
-          <p className="rounded-xl bg-navy-50 p-3 text-sm text-navy-600">
-            No upcoming dates listed yet. Send an enquiry and we&apos;ll share the next available departures.
-          </p>
-        ) : (
-          <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-            {byMonth.map(([month, list]) => (
-              <div key={month}>
-                <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-navy-400">{formatMonth(`${month}-01`)}</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {list.map((d) => {
-                    const full = d.status === "full";
-                    const isSel = d.id === selectedId;
-                    return (
-                      <button
-                        key={d.id}
-                        type="button"
-                        disabled={full}
-                        onClick={() => setSelectedId(isSel ? null : d.id)}
-                        className={`rounded-xl border px-3 py-2 text-left transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                          isSel ? "border-sun-500 bg-sun-50 ring-2 ring-sun-200" : "border-navy-100 hover:border-navy-300"
-                        }`}
-                      >
-                        <span className="block text-sm font-semibold text-navy-900">{formatDate(d.departure_date)}</span>
-                        <span className="block text-xs text-navy-500">
-                          {formatRM(d.price_myr, { compact: true }) ?? "Ask us"}
-                          {statusLabel[d.status] ? ` · ${statusLabel[d.status]}` : ""}
-                        </span>
-                        {d.price_note && <span className="block text-[11px] font-medium text-sun-600">{d.price_note}</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+          <div className="flex h-full flex-col items-start justify-center gap-3 py-8">
+            <CalendarDays className="size-10 text-sun-300" />
+            <p className="text-xl font-bold">Dates on request</p>
+            <p className="max-w-md text-navy-100">
+              We don&apos;t have upcoming departures listed for this trip yet. Send an enquiry and we&apos;ll share the next available dates and fares.
+            </p>
           </div>
+        ) : (
+          <>
+            <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Departure month">
+              {months.map((m) => {
+                const active = m === month;
+                const low = cheapest(m);
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setMonth(m)}
+                    className={`shrink-0 rounded-2xl px-4 py-2.5 text-left transition ${
+                      active ? "bg-sun-500 text-white shadow-lg shadow-sun-500/25" : "bg-white/5 text-white ring-1 ring-white/10 hover:bg-white/10"
+                    }`}
+                  >
+                    <span className="block text-sm font-bold">{formatMonth(`${m}-01`)}</span>
+                    <span className={`text-[11px] ${active ? "text-sun-50" : "text-navy-200"}`}>{low ? `from ${formatRM(low, { compact: true })}` : "ask us"}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div key={month} className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {inMonth.map((d, i) => {
+                const full = d.status === "full";
+                const isSel = d.id === selectedId;
+                const date = new Date(`${d.departure_date}T12:00:00Z`);
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    disabled={full}
+                    onClick={() => setSelectedId(isSel ? null : d.id)}
+                    style={{ animationDelay: `${i * 40}ms` }}
+                    className={`fade-up relative rounded-2xl p-4 text-left ring-1 transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                      isSel ? "bg-sun-500/15 ring-2 ring-sun-400" : "bg-white/5 ring-white/10 hover:bg-white/10 hover:ring-white/25"
+                    }`}
+                  >
+                    {isSel && (
+                      <span className="absolute right-3 top-3 grid size-5 place-items-center rounded-full bg-sun-500">
+                        <Check className="size-3.5 text-white" />
+                      </span>
+                    )}
+                    <span className="block text-[11px] font-semibold uppercase tracking-widest text-navy-200">
+                      {date.toLocaleDateString("en-MY", { weekday: "short", timeZone: "UTC" })}
+                    </span>
+                    <span className="block text-2xl font-extrabold leading-tight text-white">
+                      {date.toLocaleDateString("en-MY", { day: "numeric", month: "short", timeZone: "UTC" })}
+                    </span>
+                    <span className="mt-1 block text-sm font-semibold text-sun-300">{formatRM(d.price_myr, { compact: true }) ?? "Ask us"}</span>
+                    {(d.price_note || statusLabel[d.status]) && (
+                      <span className="mt-1 block text-[11px] leading-snug text-navy-200">{[statusLabel[d.status], d.price_note].filter(Boolean).join(" · ")}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-4 text-xs text-navy-300">Fares are per person in Ringgit. Tap a date to include it in your enquiry.</p>
+          </>
         )}
       </div>
 
-      <div className="border-t border-navy-50 pt-5">
-        <p className="mb-3 text-sm font-semibold text-navy-900">Enquire about this trip</p>
-        <EnquiryForm tourId={tourId} departureId={selected?.id} defaultMessage={message} compact />
+      <div className="rounded-3xl bg-gradient-to-b from-white/[0.09] to-white/[0.03] p-5 ring-1 ring-white/10 backdrop-blur sm:p-7">
+        <p className="text-sm text-navy-200">{priceFrom ? "From" : "Price"}</p>
+        <p className="text-3xl font-extrabold text-white">
+          {formatRM(priceFrom, { compact: true }) ?? "On request"}
+          {priceFrom ? <span className="text-sm font-normal text-navy-200"> / person</span> : null}
+        </p>
+        <p className="mt-1 min-h-5 text-sm text-sun-300">{selected ? `Departing ${formatDate(selected.departure_date, "long")}` : ""}</p>
+        <div className="mt-5">
+          <EnquiryForm tourId={tourId} departureId={selected?.id} defaultMessage={message} compact />
+        </div>
+        <a
+          href={whatsappLink(`Hi Daily Holidays! ${message}`)}
+          target="_blank"
+          rel="noopener"
+          className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 font-semibold text-white transition hover:brightness-95"
+        >
+          <WhatsAppIcon className="size-5" /> Ask on WhatsApp
+        </a>
       </div>
-
-      <a
-        href={whatsappLink(`Hi Daily Holidays! ${message}`)}
-        target="_blank"
-        rel="noopener"
-        className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] py-3 font-semibold text-white hover:brightness-95"
-      >
-        <WhatsAppIcon className="size-5" /> Ask on WhatsApp
-      </a>
     </div>
   );
 }

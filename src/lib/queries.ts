@@ -160,3 +160,11 @@ export async function getActiveDestinationIds() {
   for (const d of destinations) if (ids.has(d.id) && d.parent_id) ids.add(d.parent_id);
   return ids;
 }
+
+/** The generated country hero photos (for page backdrops), in a stable order. */
+export async function getHeroImages() {
+  const destinations = await getDestinations();
+  return destinations
+    .filter((d) => !d.parent_id && d.cover_image_url?.includes("/hero/"))
+    .map((d) => ({ name: d.name, url: d.cover_image_url! }));
+}

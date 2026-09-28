@@ -39,24 +39,6 @@ body {
   color: var(--color-navy-950);
 }
 
-.leaflet-container {
-  font-family: inherit;
-  z-index: 0;
-}
-
-.day-pin {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9999px;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 6px rgb(0 0 0 / 0.3);
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
-}
-
 /* explore hero */
 .no-scrollbar {
   scrollbar-width: none;
@@ -188,7 +170,63 @@ body {
   }
 }
 
+/* scroll reveal: elements rise in as they enter the viewport */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* trip route line draws itself */
+.route-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-outline 2.4s cubic-bezier(0.4, 0, 0.2, 1) 300ms forwards;
+}
+
+/* dark form fields (components layer, so utilities like pl-9 can override) */
+@layer components {
+  .field-dark {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: rgb(255 255 255 / 0.06);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: #fff;
+    outline: none;
+    transition: border-color 150ms, box-shadow 150ms, background 150ms;
+  }
+  .field-dark::placeholder {
+    color: rgb(179 187 228 / 0.7);
+  }
+  .field-dark:focus {
+    border-color: var(--color-sun-400);
+    background: rgb(255 255 255 / 0.09);
+    box-shadow: 0 0 0 3px rgb(243 154 52 / 0.25);
+  }
+  .field-dark option {
+    background: var(--color-navy-900);
+    color: #fff;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .route-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
   .hero-bg,
   .hero-bg > img,
   .country-draw,

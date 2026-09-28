@@ -1,9 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, FileText, Hotel, MapPinned, Plane, Route, Ship, ShieldCheck, Stamp, Users } from "lucide-react";
+import { ArrowRight, CalendarDays, Hotel, MapPinned, Plane, Route, Ship, ShieldCheck, Stamp, Users } from "lucide-react";
 import { getExploreCountries } from "@/lib/explore";
 import { listTours } from "@/lib/queries";
 import { site, whatsappLink } from "@/lib/site";
 import { ExploreHero } from "@/components/site/explore-hero";
+import { Reveal } from "@/components/site/reveal";
+import { SectionHeading } from "@/components/site/section-heading";
 import { TourCard } from "@/components/site/tour-card";
 import { WhatsAppIcon } from "@/components/site/icons";
 
@@ -13,17 +16,17 @@ const features = [
   {
     icon: Route,
     title: "Day-by-day itineraries",
-    body: "Every trip is laid out day by day: where you go, what you see, which meals are included and where you sleep.",
+    body: "Every trip laid out day by day: where you go, what you see, which meals are included and where you sleep.",
   },
   {
     icon: MapPinned,
     title: "See the route on a map",
-    body: "Follow each day's stops on an interactive map before you book, so you know exactly how the trip flows.",
+    body: "Follow each day's stops on a satellite map before you book, so you know exactly how the trip flows.",
   },
   {
     icon: CalendarDays,
-    title: "Clear dates & prices",
-    body: "Upcoming departure dates with the fare for each one, in Ringgit. No need to wait for a PDF.",
+    title: "Clear dates & fares",
+    body: "Upcoming departure dates with the fare for each one, in Ringgit. No waiting for a PDF.",
   },
 ];
 
@@ -38,107 +41,104 @@ const services = [
 
 export default async function HomePage() {
   const [countries, upcoming] = await Promise.all([getExploreCountries(10), listTours({}, 8)]);
+  const ctaImage = countries[1]?.image ?? countries[0]?.image ?? null;
 
   return (
     <>
       <ExploreHero countries={countries} />
 
       {/* UPCOMING */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-sun-600">Departing soon</p>
-            <h2 className="mt-1 text-3xl font-bold text-navy-900">Upcoming trips</h2>
-          </div>
-          <Link href="/tours" className="inline-flex items-center gap-1 font-semibold text-navy-700 hover:text-sun-600">
+      <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6">
+        <SectionHeading eyebrow="Departing soon" title="Upcoming trips">
+          <Link href="/tours" className="inline-flex items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15 hover:bg-white/20">
             See all trips <ArrowRight className="size-4" />
           </Link>
-        </div>
+        </SectionHeading>
         {upcoming.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {upcoming.map((t) => (
-              <TourCard key={t.id} tour={t} />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {upcoming.map((t, i) => (
+              <Reveal key={t.id} delay={(i % 4) * 80}>
+                <TourCard tour={t} />
+              </Reveal>
             ))}
           </div>
         ) : (
-          <p className="rounded-2xl bg-white p-10 text-center text-navy-500 ring-1 ring-navy-100">
+          <p className="rounded-3xl bg-white/[0.04] p-10 text-center text-navy-200 ring-1 ring-white/10">
             New trips are being added. Please check back soon or contact us on WhatsApp.
           </p>
         )}
       </section>
 
       {/* FEATURES */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-sun-600">Plan with confidence</p>
-            <h2 className="mt-1 text-3xl font-bold text-navy-900">Know the whole trip before you go</h2>
-          </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {features.map((f) => (
-              <div key={f.title} className="rounded-2xl bg-sand-50 p-6 ring-1 ring-navy-100">
-                <span className="grid size-12 place-items-center rounded-xl bg-sun-100 text-sun-600">
+      <section className="mx-auto max-w-7xl px-4 pt-28 sm:px-6">
+        <SectionHeading eyebrow="Plan with confidence" title="Know the whole trip before you go" />
+        <div className="grid gap-5 md:grid-cols-3">
+          {features.map((f, i) => (
+            <Reveal key={f.title} delay={i * 90}>
+              <div className="group h-full rounded-3xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-7 ring-1 ring-white/10 transition hover:ring-sun-400/40">
+                <span className="grid size-12 place-items-center rounded-2xl bg-sun-500/15 text-sun-300 ring-1 ring-sun-400/30 transition group-hover:bg-sun-500 group-hover:text-white">
                   <f.icon className="size-6" />
                 </span>
-                <h3 className="mt-5 text-lg font-semibold text-navy-900">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-navy-600">{f.body}</p>
+                <h3 className="mt-6 text-lg font-bold text-white">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-navy-200">{f.body}</p>
               </div>
-            ))}
-          </div>
+            </Reveal>
+          ))}
         </div>
       </section>
 
       {/* SERVICES */}
-      <section id="services" className="bg-navy-900 py-20 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <p className="text-sm font-semibold uppercase tracking-wider text-sun-300">More than tours</p>
-          <h2 className="mt-1 text-3xl font-bold">Everything for your trip, in one place</h2>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((s) => {
-              const inner = (
-                <>
-                  <s.icon className="size-6 text-sun-300" />
-                  <div>
-                    <h3 className="font-semibold">{s.title}</h3>
-                    <p className="mt-1 text-sm text-navy-200">{s.body}</p>
-                  </div>
-                </>
-              );
-              const cls = "flex gap-4 rounded-2xl bg-white/5 p-5 ring-1 ring-white/10 transition hover:bg-white/10";
-              return s.href ? (
-                <a key={s.title} href={s.href} className={cls} {...(s.href.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}>
-                  {inner}
-                </a>
-              ) : (
-                <div key={s.title} className={cls}>{inner}</div>
-              );
-            })}
-          </div>
+      <section id="services" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-28 sm:px-6">
+        <SectionHeading eyebrow="More than tours" title="Everything for your trip, in one place" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((s, i) => {
+            const inner = (
+              <>
+                <s.icon className="size-6 shrink-0 text-sun-300" />
+                <div>
+                  <h3 className="font-semibold text-white">{s.title}</h3>
+                  <p className="mt-1 text-sm text-navy-200">{s.body}</p>
+                </div>
+              </>
+            );
+            const cls = "flex h-full gap-4 rounded-2xl bg-white/[0.04] p-5 ring-1 ring-white/10 transition hover:bg-white/[0.08]";
+            return (
+              <Reveal key={s.title} delay={(i % 3) * 70}>
+                {s.href ? (
+                  <a href={s.href} className={cls} {...(s.href.startsWith("http") ? { target: "_blank", rel: "noopener" } : {})}>
+                    {inner}
+                  </a>
+                ) : (
+                  <div className={cls}>{inner}</div>
+                )}
+              </Reveal>
+            );
+          })}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sun-500 to-sun-600 px-6 py-14 text-center text-white sm:px-12">
-          <FileText className="absolute -right-6 -top-6 size-40 opacity-10" />
-          <h2 className="text-3xl font-bold">Can&apos;t find the trip you want?</h2>
-          <p className="mx-auto mt-3 max-w-xl text-sun-50">
-            Tell us where and when. We plan custom and group trips and reply on WhatsApp.
-          </p>
+      <section className="mx-auto max-w-7xl px-4 py-28 sm:px-6">
+        <Reveal className="relative isolate overflow-hidden rounded-[2rem] px-6 py-16 text-center ring-1 ring-white/10 sm:px-12">
+          {ctaImage && <Image src={ctaImage} alt="" fill sizes="100vw" className="-z-20 object-cover" />}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-navy-950/90 via-navy-950/70 to-sun-700/60" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sun-300">Tailor-made</p>
+          <h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">Can&apos;t find the trip you want?</h2>
+          <p className="mx-auto mt-3 max-w-xl text-navy-100">Tell us where and when. We plan custom and group trips and reply on WhatsApp.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <a
               href={whatsappLink("Hi Daily Holidays, I'd like help planning a trip.")}
               target="_blank"
               rel="noopener"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-sun-700 shadow hover:bg-sun-50"
+              className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 font-semibold text-white shadow-lg hover:brightness-95"
             >
               <WhatsAppIcon className="size-5" /> WhatsApp us
             </a>
-            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full border border-white/60 px-6 py-3 font-semibold hover:bg-white/10">
+            <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-3 font-semibold ring-1 ring-white/25 backdrop-blur hover:bg-white/20">
               Send an enquiry
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
     </>
   );
