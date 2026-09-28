@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronDown, LoaderCircle, MapPin, MapPinned, Plus, Trash2 } from "lucide-react";
-import { deleteDay, locatePlaces, saveDay, updatePlace } from "@/app/admin/actions";
+import { ChevronDown, ImageIcon, LoaderCircle, MapPin, MapPinned, Plus, Sparkles, Trash2 } from "lucide-react";
+import { deleteDay, findTourPlaceMedia, locatePlaces, saveDay } from "@/app/admin/actions";
 import type { ActionResult } from "@/lib/admin";
 import { ActionForm, Status, SubmitButton, input, label } from "@/components/admin/ui";
+import { PlaceMediaEditor, type EditablePlace } from "@/components/admin/place-media-editor";
 import { Section } from "./section";
 
-type Place = { id: string; name: string; lat: number | null; lng: number | null };
+type Place = EditablePlace;
 type Day = {
   id: string;
   day_number: number;
@@ -63,35 +64,58 @@ function DayFields({ day, nextNumber }: { day?: Day; nextNumber?: number }) {
   );
 }
 
+const PUBLISHED = new Set(["found", "approved", "manual"]);
+
+/** A stop as a chip (photo thumbnail + name); opens the full photo/description editor. */
 function PlaceRow({ place, tourId }: { place: Place; tourId: string }) {
   const [open, setOpen] = useState(false);
   const located = place.lat != null && place.lng != null;
+  const hasPhoto = !!place.image_url && PUBLISHED.has(place.media_status ?? "");
   return (
-    <li className="text-sm">
-      <button type="button" onClick={() => setOpen((v) => !v)} className="flex items-center gap-1.5 rounded-full bg-navy-50 px-3 py-1 text-navy-700 hover:bg-navy-100">
+    <li className={`text-sm ${open ? "basis-full" : ""}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 rounded-full bg-navy-50 py-1 pl-1 pr-3 text-navy-700 hover:bg-navy-100"
+        title={place.media_status === "review" ? "Photo needs review" : undefined}
+      >
+        {hasPhoto ? (
+          // eslint-disable-next-line @next/next/no-img-element -- tiny admin thumbnail
+          <img src={place.image_url!} alt="" className="size-6 rounded-full object-cover" />
+        ) : (
+          <span className={`grid size-6 place-items-center rounded-full ${place.media_status === "review" ? "bg-sun-100 text-sun-700" : "bg-white text-navy-300"}`}>
+            <ImageIcon className="size-3.5" />
+          </span>
+        )}
         <MapPin className={`size-3.5 ${located ? "text-green-600" : "text-navy-300"}`} />
         {place.name}
         {!located && <span className="text-xs text-navy-400">(not on map)</span>}
       </button>
       {open && (
-        <ActionForm action={updatePlace.bind(null, place.id, tourId)} className="mt-2 flex flex-wrap items-center gap-2 rounded-lg bg-navy-50/60 p-2">
-          {(state) => (
-            <>
-              <input name="name" defaultValue={place.name} className={`${input} w-48`} />
-              <input name="lat" placeholder="Latitude" defaultValue={place.lat ?? ""} className={`${input} w-32`} />
-              <input name="lng" placeholder="Longitude" defaultValue={place.lng ?? ""} className={`${input} w-32`} />
-              <SubmitButton variant="secondary">Save place</SubmitButton>
-              {located && (
-                <a href={`https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lng}#map=14/${place.lat}/${place.lng}`} target="_blank" rel="noopener" className="text-xs text-navy-600 underline">
-                  Check on map
-                </a>
-              )}
-              <Status state={state} />
-            </>
-          )}
-        </ActionForm>
+        <div className="mt-2">
+          <PlaceMediaEditor place={place} tourId={tourId} />
+        </div>
       )}
     </li>
+  );
+}
+
+function FindPhotosButton({ tourId, missing }: { tourId: string; missing: number }) {
+  const [pending, start] = useTransition();
+  const [result, setResult] = useState<ActionResult>(null);
+  return (
+    <div className="flex items-center gap-3">
+      <Status state={result} />
+      <button
+        type="button"
+        disabled={pending || missing === 0}
+        onClick={() => start(async () => setResult(await findTourPlaceMedia(tourId)))}
+        className="inline-flex items-center gap-2 rounded-lg bg-sun-500 px-3 py-2 text-sm font-semibold text-white hover:bg-sun-600 disabled:opacity-50"
+      >
+        {pending ? <LoaderCircle className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+        {pending ? "Searching…" : missing ? `Find photos for ${missing} stop${missing === 1 ? "" : "s"}` : "All stops have photos"}
+      </button>
+    </div>
   );
 }
 
@@ -118,13 +142,19 @@ export function DaysEditor({ tourId, days }: { tourId: string; days: Day[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const missing = new Set(days.flatMap((d) => d.places.filter((p) => p.lat == null).map((p) => p.id))).size;
+  const noPhoto = new Set(days.flatMap((d) => d.places.filter((p) => p.media_status == null || p.media_status === "none").map((p) => p.id))).size;
   const nextNumber = (days.at(-1)?.day_number ?? 0) + 1;
 
   return (
     <Section
       title="Day-by-day itinerary"
-      description="Each day's places are plotted on the tour map. Green pins are located; click a place to fix its position."
-      actions={<LocateButton tourId={tourId} missing={missing} />}
+      description="Each day's stops appear on the tour map with a photo and a short description. Click a stop to change its photo, text or position."
+      actions={
+        <div className="flex flex-wrap items-center gap-2">
+          <FindPhotosButton tourId={tourId} missing={noPhoto} />
+          <LocateButton tourId={tourId} missing={missing} />
+        </div>
+      }
     >
       <ol className="space-y-3">
         {days.map((d) => {

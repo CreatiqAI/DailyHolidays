@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, FilePlus2, Inbox, Route, Sparkles } from "lucide-react";
+import { CalendarDays, FilePlus2, Images, Inbox, Route, Sparkles } from "lucide-react";
 import { requireAdmin } from "@/lib/admin";
 import { addDaysISO, formatDate, formatRM, todayISO } from "@/lib/format";
 
@@ -8,7 +8,7 @@ export default async function Dashboard() {
   const today = todayISO();
   const in60 = addDaysISO(today, 60);
 
-  const [published, drafts, newEnq, upcoming, enquiries, departures] = await Promise.all([
+  const [published, drafts, newEnq, upcoming, enquiries, departures, toReview] = await Promise.all([
     supabase.from("tours").select("id", { count: "exact", head: true }).eq("status", "published"),
     supabase.from("tours").select("id", { count: "exact", head: true }).eq("status", "draft"),
     supabase.from("enquiries").select("id", { count: "exact", head: true }).eq("handled", false),
@@ -25,6 +25,7 @@ export default async function Dashboard() {
       .eq("tours.status", "published")
       .order("departure_date")
       .limit(8),
+    supabase.from("places").select("id", { count: "exact", head: true }).eq("media_status", "review"),
   ]);
 
   const stats = [
@@ -32,6 +33,7 @@ export default async function Dashboard() {
     { label: "Drafts to review", value: drafts.count ?? 0, icon: FilePlus2, href: "/admin/tours?status=draft" },
     { label: "New enquiries", value: newEnq.count ?? 0, icon: Inbox, href: "/admin/enquiries" },
     { label: "Departures, next 60 days", value: upcoming.count ?? 0, icon: CalendarDays, href: "/admin/tours" },
+    { label: "Stop photos to review", value: toReview.count ?? 0, icon: Images, href: "/admin/places?tab=review" },
   ];
 
   return (
@@ -43,7 +45,7 @@ export default async function Dashboard() {
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {stats.map((s) => (
           <Link key={s.label} href={s.href} className="rounded-xl bg-white p-5 ring-1 ring-navy-100 hover:ring-navy-300">
             <s.icon className="size-5 text-sun-500" />

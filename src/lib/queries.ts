@@ -3,6 +3,7 @@ import { cache } from "react";
 import { createPublicClient } from "@/lib/supabase/server";
 import { todayISO } from "@/lib/format";
 import type { Tables } from "@/lib/database.types";
+import { PUBLIC_MEDIA, type MediaStatus } from "@/lib/place-enrich";
 
 export type Destination = Tables<"destinations">;
 
@@ -113,7 +114,7 @@ export const getTour = cache(async (slug: string) => {
        destination:destinations(id, name, slug, region, parent_id),
        tour_departures(id, departure_date, price_myr, price_note, status),
        tour_days(id, day_number, title, description, meals, hotel,
-         tour_day_places(sort_order, place:places(id, name, lat, lng, description))),
+         tour_day_places(sort_order, place:places(id, name, lat, lng, description, image_url, image_credit, image_source_url, info_source_url, media_status))),
        tour_media(id, kind, url, caption, sort_order)`,
     )
     .eq("slug", slug)
@@ -140,7 +141,18 @@ export const getTour = cache(async (slug: string) => {
         places: [...d.tour_day_places]
           .sort((a, b) => a.sort_order - b.sort_order)
           .map((p) => p.place)
-          .filter((p): p is NonNullable<typeof p> => p !== null),
+          .filter((p): p is NonNullable<typeof p> => p !== null)
+          .map(({ media_status, ...p }) => {
+            // photos and descriptions are only shown once verified or approved by staff
+            const shown = PUBLIC_MEDIA.includes(media_status as MediaStatus);
+            return {
+              ...p,
+              image_url: shown ? p.image_url : null,
+              image_credit: shown ? p.image_credit : null,
+              image_source_url: shown ? p.image_source_url : null,
+              description: shown || media_status == null ? p.description : null,
+            };
+          }),
       })),
     images: data.tour_media.filter((m) => m.kind === "image").sort((a, b) => a.sort_order - b.sort_order),
     pdfs: data.tour_media.filter((m) => m.kind === "pdf").sort((a, b) => a.sort_order - b.sort_order),

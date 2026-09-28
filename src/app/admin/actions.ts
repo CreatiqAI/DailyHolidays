@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin, type ActionResult } from "@/lib/admin";
 import { lines, slugify } from "@/lib/format";
 import { geocode } from "@/lib/geocode";
+import { articlePhoto, enrichPlace, loadPlaceContexts, searchCandidates, searchCommons, type Photo } from "@/lib/place-enrich";
 import { extractTourFromPdf, linkPlaces, refreshPriceFrom, resolveDestination, writeExtraction } from "@/lib/extract";
 import type { Database } from "@/lib/database.types";
 
@@ -234,16 +235,119 @@ export async function locatePlaces(tourId: string): Promise<ActionResult> {
   };
 }
 
-export async function updatePlace(id: string, tourId: string, _prev: ActionResult, fd: FormData): Promise<ActionResult> {
+export async function updatePlace(id: string, tourId: string | null, _prev: ActionResult, fd: FormData): Promise<ActionResult> {
+  const { supabase } = await requireAdmin();
+  const values: Database["public"]["Tables"]["places"]["Update"] = { name: s(fd, "name"), lat: numOrNull(fd, "lat"), lng: numOrNull(fd, "lng") };
+  if (fd.has("description")) values.description = sOrNull(fd, "description");
+  const { error } = await supabase.from("places").update(values).eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  publish();
+  if (tourId) revalidatePath(`/admin/tours/${tourId}`);
+  revalidatePath("/admin/places");
+  return { ok: true, message: "Saved" };
+}
+
+// ---------------------------------------------------------------- stop photos & descriptions
+
+/** Find photos + descriptions for the given stops (Wikipedia / Wikimedia Commons). */
+export async function findPlaceMedia(placeIds: string[]): Promise<ActionResult> {
+  const { supabase } = await requireAdmin();
+  const places = await loadPlaceContexts(supabase, placeIds.slice(0, 15));
+  const tally: Record<string, number> = {};
+  for (const p of places) {
+    const r = await enrichPlace(supabase, p, { openaiKey: process.env.OPENAI_API_KEY });
+    tally[r.status] = (tally[r.status] ?? 0) + 1;
+  }
+  publish();
+  revalidatePath("/admin/places");
+  const parts = [
+    tally.found && `${tally.found} published`,
+    tally.review && `${tally.review} to review`,
+    tally.none && `${tally.none} not found`,
+  ].filter(Boolean);
+  const left = placeIds.length - places.length;
+  return { ok: true, message: `${parts.join(", ") || "Nothing found"}.${left > 0 ? ` ${left} more — click again.` : ""}` };
+}
+
+/** Stops of one tour that have never been searched (or had no result). */
+export async function findTourPlaceMedia(tourId: string): Promise<ActionResult> {
+  const { supabase } = await requireAdmin();
+  const { data } = await supabase
+    .from("tour_days")
+    .select("tour_day_places(place:places(id, media_status))")
+    .eq("tour_id", tourId);
+  const ids = [
+    ...new Set(
+      (data ?? []).flatMap((d) =>
+        d.tour_day_places.flatMap((l) => (l.place && (l.place.media_status == null || l.place.media_status === "none") ? [l.place.id] : [])),
+      ),
+    ),
+  ];
+  if (!ids.length) return { ok: true, message: "Every stop already has a photo or has been checked." };
+  const res = await findPlaceMedia(ids);
+  revalidatePath(`/admin/tours/${tourId}`);
+  return res;
+}
+
+export type PhotoOption = Photo & { source: "wikipedia" | "commons"; extract?: string };
+
+/** Photo options for a stop, for staff to pick from (optionally with a better search term). */
+export async function searchPlacePhotos(placeId: string, query?: string): Promise<{ options: PhotoOption[]; error?: string }> {
+  const { supabase } = await requireAdmin();
+  const [place] = await loadPlaceContexts(supabase, [placeId]);
+  if (!place) return { options: [], error: "Stop not found." };
+  try {
+    const [articles, commons] = await Promise.all([searchCandidates(place, query), searchCommons(place, query, 12)]);
+    const fromArticles = (
+      await Promise.all(articles.slice(0, 3).map(async (c) => {
+        const p = await articlePhoto(c);
+        return p ? ({ ...p, source: "wikipedia", extract: c.extract } as PhotoOption) : null;
+      }))
+    ).filter((p): p is PhotoOption => p !== null);
+    const seen = new Set(fromArticles.map((p) => p.url));
+    const options = [...fromArticles, ...commons.filter((p) => !seen.has(p.url)).map((p) => ({ ...p, source: "commons" as const }))].slice(0, 12);
+    return { options };
+  } catch (e) {
+    return { options: [], error: errMsg(e) };
+  }
+}
+
+/** Store a photo staff picked (and refresh the description from the matching article). */
+export async function choosePlacePhoto(placeId: string, photo: Photo, query?: string): Promise<ActionResult> {
+  const { supabase } = await requireAdmin();
+  const [place] = await loadPlaceContexts(supabase, [placeId]);
+  if (!place) return { ok: false, error: "Stop not found." };
+  const r = await enrichPlace(supabase, place, { photo, query, openaiKey: process.env.OPENAI_API_KEY });
+  if (r.error) return { ok: false, error: r.error };
+  publish();
+  revalidatePath("/admin/places");
+  return { ok: true, message: "Photo saved and published." };
+}
+
+export async function setPlaceMediaStatus(placeId: string, status: "approved" | "rejected"): Promise<ActionResult> {
+  const { supabase } = await requireAdmin();
+  const values: Database["public"]["Tables"]["places"]["Update"] =
+    status === "approved"
+      ? { media_status: "approved" }
+      : { media_status: "rejected", image_url: null, image_credit: null, image_source_url: null };
+  const { error } = await supabase.from("places").update(values).eq("id", placeId);
+  if (error) return { ok: false, error: error.message };
+  publish();
+  revalidatePath("/admin/places");
+  return { ok: true, message: status === "approved" ? "Approved, now shown on the site." : "Removed." };
+}
+
+/** Staff uploaded their own photo (already in storage). */
+export async function setPlaceManualPhoto(placeId: string, url: string, credit: string | null): Promise<ActionResult> {
   const { supabase } = await requireAdmin();
   const { error } = await supabase
     .from("places")
-    .update({ name: s(fd, "name"), lat: numOrNull(fd, "lat"), lng: numOrNull(fd, "lng") })
-    .eq("id", id);
+    .update({ image_url: url, image_credit: credit, image_source_url: null, media_status: "manual", enriched_at: new Date().toISOString() })
+    .eq("id", placeId);
   if (error) return { ok: false, error: error.message };
   publish();
-  revalidatePath(`/admin/tours/${tourId}`);
-  return { ok: true, message: "Saved" };
+  revalidatePath("/admin/places");
+  return { ok: true, message: "Photo uploaded and published." };
 }
 
 // ---------------------------------------------------------------- media

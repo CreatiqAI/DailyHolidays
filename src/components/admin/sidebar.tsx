@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ExternalLink, Inbox, LayoutDashboard, LogOut, Map, Menu, Route, X } from "lucide-react";
+import { ExternalLink, Images, Inbox, LayoutDashboard, LogOut, Map, Menu, Route, X } from "lucide-react";
 import { signOut } from "@/app/admin/actions";
 
 const items = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/tours", label: "Tours", icon: Route },
   { href: "/admin/enquiries", label: "Enquiries", icon: Inbox },
+  { href: "/admin/places", label: "Places & photos", icon: Images },
   { href: "/admin/destinations", label: "Destinations", icon: Map },
 ];
 
-export function Sidebar({ email, newEnquiries }: { email: string; newEnquiries: number }) {
+export function Sidebar({ email, newEnquiries, placesToReview = 0 }: { email: string; newEnquiries: number; placesToReview?: number }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -33,6 +34,9 @@ export function Sidebar({ email, newEnquiries }: { email: string; newEnquiries: 
             <it.icon className="size-4" /> {it.label}
             {it.href === "/admin/enquiries" && newEnquiries > 0 && (
               <span className="ml-auto rounded-full bg-sun-500 px-2 py-0.5 text-xs font-bold text-white">{newEnquiries}</span>
+            )}
+            {it.href === "/admin/places" && placesToReview > 0 && (
+              <span className="ml-auto rounded-full bg-white/15 px-2 py-0.5 text-xs font-bold text-white" title="Photos to review">{placesToReview}</span>
             )}
           </Link>
         );

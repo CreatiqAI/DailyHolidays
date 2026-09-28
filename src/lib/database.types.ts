@@ -132,30 +132,45 @@ export type Database = {
           created_at: string
           description: string | null
           destination_id: string | null
+          enriched_at: string | null
           id: string
+          image_credit: string | null
+          image_source_url: string | null
           image_url: string | null
+          info_source_url: string | null
           lat: number | null
           lng: number | null
+          media_status: string | null
           name: string
         }
         Insert: {
           created_at?: string
           description?: string | null
           destination_id?: string | null
+          enriched_at?: string | null
           id?: string
+          image_credit?: string | null
+          image_source_url?: string | null
           image_url?: string | null
+          info_source_url?: string | null
           lat?: number | null
           lng?: number | null
+          media_status?: string | null
           name: string
         }
         Update: {
           created_at?: string
           description?: string | null
           destination_id?: string | null
+          enriched_at?: string | null
           id?: string
+          image_credit?: string | null
+          image_source_url?: string | null
           image_url?: string | null
+          info_source_url?: string | null
           lat?: number | null
           lng?: number | null
+          media_status?: string | null
           name?: string
         }
         Relationships: [

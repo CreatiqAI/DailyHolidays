@@ -24,7 +24,7 @@ export default async function EditTourPage(props: PageProps<"/admin/tours/[id]">
         `*,
          tour_departures(id, departure_date, price_myr, price_note, status),
          tour_days(id, day_number, title, description, meals, hotel,
-           tour_day_places(sort_order, place:places(id, name, lat, lng))),
+           tour_day_places(sort_order, place:places(id, name, lat, lng, description, image_url, image_credit, image_source_url, info_source_url, media_status))),
          tour_media(id, kind, url, caption, sort_order)`,
       )
       .eq("id", id)

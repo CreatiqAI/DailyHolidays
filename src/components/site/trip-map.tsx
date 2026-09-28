@@ -8,7 +8,7 @@ import { Minus, Plus, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { satelliteTiles } from "./satellite";
 
-export type TripStop = { id: string; name: string; lat: number; lng: number; day: number };
+export type TripStop = { id: string; name: string; lat: number; lng: number; day: number; image?: string | null };
 
 const PAD = 70;
 
@@ -143,6 +143,11 @@ export function TripMap({
     <div ref={wrapRef} className="absolute inset-0 overflow-hidden bg-navy-900">
       {w > 0 && (
         <svg ref={svgRef} width={w} height={h} className="absolute inset-0 h-full w-full cursor-grab select-none active:cursor-grabbing" role="img" aria-label="Map of the trip route">
+          <defs>
+            <clipPath id="stop-clip">
+              <circle r={15} />
+            </clipPath>
+          </defs>
           <g>
             {tiles.map((tl) => (
               <image key={tl.key} href={tl.url} x={tl.x} y={tl.y} width={tl.size} height={tl.size} preserveAspectRatio="none" className="tile-in" />
@@ -161,13 +166,26 @@ export function TripMap({
             {points
               .filter((p) => p.day === activeDay)
               .map((p) => (
-                <g key={`s-${p.id}-${p.day}`} transform={`translate(${p.xy[0]}, ${p.xy[1]}) scale(${inv})`} className="spot-body">
-                  <circle r={9} fill="#ffffff" fillOpacity={0.18} />
-                  <circle r={4} fill="#ffffff" stroke="#0b0f29" strokeOpacity={0.6} strokeWidth={1.5} />
-                  <rect x={12} y={-10} width={p.name.length * 6.2 + 16} height={20} rx={10} fill="#0b0f29" fillOpacity={0.75} stroke="#ffffff" strokeOpacity={0.15} />
-                  <text x={12 + (p.name.length * 6.2 + 16) / 2} y={4} textAnchor="middle" fontSize={11} fontWeight={600} fill="#ffffff">
+                <g key={`s-${p.id}-${p.day}`} transform={`translate(${p.xy[0]}, ${p.xy[1]}) scale(${inv})`}>
+                  {/* the entrance animation lives on an inner group: a CSS transform would override the positioning one */}
+                  <g className="spot-body">
+                  {p.image ? (
+                    <>
+                      <circle r={19} fill="#0b0f29" fillOpacity={0.5} />
+                      <circle r={17} fill="#ffffff" />
+                      <image href={p.image} x={-15} y={-15} width={30} height={30} preserveAspectRatio="xMidYMid slice" clipPath="url(#stop-clip)" />
+                    </>
+                  ) : (
+                    <>
+                      <circle r={9} fill="#ffffff" fillOpacity={0.18} />
+                      <circle r={4} fill="#ffffff" stroke="#0b0f29" strokeOpacity={0.6} strokeWidth={1.5} />
+                    </>
+                  )}
+                  <rect x={p.image ? 22 : 12} y={-10} width={p.name.length * 6.2 + 16} height={20} rx={10} fill="#0b0f29" fillOpacity={0.75} stroke="#ffffff" strokeOpacity={0.15} />
+                  <text x={(p.image ? 22 : 12) + (p.name.length * 6.2 + 16) / 2} y={4} textAnchor="middle" fontSize={11} fontWeight={600} fill="#ffffff">
                     {p.name}
                   </text>
+                  </g>
                 </g>
               ))}
 

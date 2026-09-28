@@ -46,7 +46,20 @@ node --env-file=.env.local scripts/generate-country-images.mjs --only japan,thai
 supabase migration new <name>
 supabase db push
 supabase gen types typescript --linked --schema public > src/lib/database.types.ts
+
+# stop photos + descriptions (Wikipedia / Wikimedia Commons): stops never searched, 4 at a time;
+# --tour <slug> for one tour, --redo to retry stops with no result. Staff can also do this in Admin -> Places.
+node --env-file=.env.local --no-warnings scripts/enrich-places.mjs --limit 2000
 ```
+
+## Stop photos
+
+Each itinerary stop gets a real photo and a 1-2 sentence description from Wikipedia / Wikimedia Commons
+(free to reuse; the photographer and licence are credited on the site). A match is published
+automatically only when the article or geotagged photo is within 25 km of the stop; anything else waits in
+**Admin -> Places -> Needs review**. Staff can approve, reject, search again with a better name, pick from
+alternatives, or upload their own photo. Photos are copied into Supabase Storage (`tour-media/places/`).
+We deliberately don't scrape Google/other sites: those photos are copyrighted.
 
 ## How content flows
 
