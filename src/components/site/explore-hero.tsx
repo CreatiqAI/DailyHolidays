@@ -31,7 +31,8 @@ function useHeight<T extends HTMLElement>() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setHeight(Math.round(entry.contentRect.height)));
+    // border box: the overlays' padding is part of the space they cover
+    const ro = new ResizeObserver(([entry]) => setHeight(Math.round(entry.borderBoxSize?.[0]?.blockSize ?? entry.target.getBoundingClientRect().height)));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -143,8 +144,8 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
     [area, month, sort],
   );
 
-  // the overlays fade out, so the country may extend a little under them
-  const fit = useMemo(() => ({ top: Math.max(120, topH - 40), right: 48, bottom: Math.max(120, shelfH - 30), left: 48 }), [topH, shelfH]);
+  // keep the country clear of the tile row (pins under it can't be tapped); the shelf's faded top may overlap a little
+  const fit = useMemo(() => ({ top: Math.max(120, topH - 36), right: 72, bottom: Math.max(120, shelfH - 32), left: 48 }), [topH, shelfH]);
 
   if (!country) return null;
 
@@ -159,7 +160,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
   };
 
   return (
-    <section className="relative isolate h-[100svh] min-h-[720px] overflow-hidden bg-navy-950 text-white">
+    <section className="relative isolate h-[100svh] min-h-[760px] overflow-hidden bg-navy-950 text-white">
       <HeroBackdrop image={country.image} />
 
       <CountryMap
@@ -173,7 +174,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
       />
 
       {/* top: headline + country selector */}
-      <div ref={topRef} className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-navy-950/95 via-navy-950/55 to-transparent pb-12 pt-20 sm:pt-24">
+      <div ref={topRef} className="pointer-events-none absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-navy-950/95 via-navy-950/55 to-transparent pb-12 pt-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -181,16 +182,18 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
               <h1 className="text-4xl font-extrabold leading-[1.05] sm:text-5xl">
                 Where to <span className="font-script font-semibold text-sun-300">next?</span>
               </h1>
-              <p className="mt-2 max-w-xl text-sm text-navy-100 sm:text-base">Pick a country, tap a place on the map, and find the trip that fits you.</p>
             </div>
             <Link href="/tours" className="pointer-events-auto inline-flex items-center gap-1 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/15 backdrop-blur hover:bg-white/20">
               Browse all trips <ChevronRight className="size-4" />
             </Link>
           </div>
 
-          <div className="relative mt-5">
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-navy-950/60 to-transparent" />
-            <div className="pointer-events-auto no-scrollbar -mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-2 pt-1 sm:mx-0 sm:px-0" role="tablist" aria-label="Countries">
+          <div className="relative mt-4">
+            <div
+              className="pointer-events-auto no-scrollbar -mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 py-1.5 sm:-mx-1.5 sm:px-1.5 [mask-image:linear-gradient(to_right,black_calc(100%_-_4rem),transparent)]"
+              role="tablist"
+              aria-label="Countries"
+            >
               {countries.map((c) => {
                 const active = c.id === country.id;
                 return (
@@ -200,10 +203,10 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
                     role="tab"
                     aria-selected={active}
                     onClick={() => pickCountry(c.id)}
-                    className={`group relative h-16 w-32 shrink-0 snap-start overflow-hidden rounded-xl text-left transition-all duration-300 sm:h-20 sm:w-36 ${
+                    className={`group relative h-16 w-32 shrink-0 snap-start overflow-hidden rounded-xl text-left transition-all duration-300 sm:h-[72px] sm:w-36 ${
                       active
-                        ? "scale-[1.05] shadow-2xl shadow-sun-500/25 ring-2 ring-sun-400"
-                        : "opacity-70 ring-1 ring-white/15 hover:scale-[1.02] hover:opacity-100"
+                        ? "shadow-2xl shadow-sun-500/25 ring-2 ring-sun-400"
+                        : "opacity-70 ring-1 ring-white/15 hover:opacity-100"
                     }`}
                   >
                     {c.image ? (
@@ -225,22 +228,25 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
       </div>
 
       {/* bottom: shelf of places, or of the selected place's trips */}
-      <div ref={shelfRef} className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-navy-950 via-navy-950/85 to-transparent pb-4 pt-14">
+      <div ref={shelfRef} className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-navy-950 via-navy-950/85 to-transparent pb-3 pt-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div key={area?.id ?? "areas"} className="panel-in flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-            <div>
-              {area ? (
-                <button type="button" onClick={() => pickArea(null)} className="pointer-events-auto mb-1 inline-flex items-center gap-1 text-xs font-semibold text-sun-300 hover:text-sun-200">
-                  <ArrowLeft className="size-3.5" /> All of {country.name}
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              {area && (
+                <button
+                  type="button"
+                  onClick={() => pickArea(null)}
+                  aria-label={`Back to all of ${country.name}`}
+                  className="pointer-events-auto grid size-8 place-items-center self-center rounded-full bg-white/10 text-sun-300 ring-1 ring-white/15 hover:bg-white/20"
+                >
+                  <ArrowLeft className="size-4" />
                 </button>
-              ) : (
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-sun-300">{country.name}</p>
               )}
               <h2 className="text-xl font-bold leading-tight sm:text-2xl">{area ? area.name : `Where in ${country.name}?`}</h2>
               <p className="text-sm text-navy-200">
                 {area
-                  ? `${tours.length} of ${area.tours.length} trips`
-                  : `${country.tourCount} trips across ${places.length} ${places.length === 1 ? "place" : "places"} — tap one`}
+                  ? `${tours.length} of ${area.tours.length} trips in ${country.name}`
+                  : `${country.tourCount} trips · ${places.length} ${places.length === 1 ? "place" : "places"} · tap a place on the map or below`}
               </p>
             </div>
             {area && (
@@ -275,7 +281,7 @@ export function ExploreHero({ countries }: { countries: ExploreCountry[] }) {
                     onClick={() => pickArea(p.id)}
                     onMouseEnter={() => setHotId(p.id)}
                     onMouseLeave={() => setHotId(null)}
-                    className="fade-up group relative h-28 w-44 shrink-0 snap-start overflow-hidden rounded-2xl text-left ring-1 ring-white/15 transition duration-300 hover:-translate-y-1 hover:ring-sun-400 sm:h-32 sm:w-52"
+                    className="fade-up group relative h-28 w-44 shrink-0 snap-start overflow-hidden rounded-2xl text-left ring-1 ring-white/15 transition duration-300 hover:-translate-y-1 hover:ring-sun-400 sm:w-52"
                     style={{ animationDelay: `${i * 40}ms` }}
                   >
                     {p.image ? (

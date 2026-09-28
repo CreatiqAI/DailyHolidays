@@ -112,14 +112,23 @@ class Places:
 
 # ------------------------------------------------------------------ helpers
 AREA_ALIASES = {"danang": "Da Nang", "macao": "Macau", "sanya": "Hainan", "hobart": "Tasmania",
-                "chiang mai": "Chiang Mai", "xian": "Xi'an"}
+                "chiang mai": "Chiang Mai", "xian": "Xi'an",
+                # a city filed inside its province, so the map shows one place, not two overlapping ones
+                "zhangjiajie": "Hunan", "changsha": "Hunan", "phoenix ancient town": "Hunan"}
 COUNTRY_LIKE_AREAS = {"hong kong": "Hong Kong", "macau": "Macau", "macao": "Macau"}
+# "areas" that are really the whole country: tours go on the country itself
+COUNTRY_WIDE_AREAS = {"7 emirates", "united states of america", "usa", "america", "all regions", "nationwide"}
 
 
 def norm_area(area, country):
     """'Chengdu & Chongqing' -> 'Chengdu'; aliases; returns (country, area)."""
     if not area:
         return country, None
+    whole = area.strip().lower()
+    if whole in COUNTRY_WIDE_AREAS:
+        return country, None
+    if whole in AREA_ALIASES:
+        return country, AREA_ALIASES[whole]
     first = re.split(r"\s*(?:&|and|/|\+|·|,|x|×)\s*", area.strip())[0].strip()
     first = AREA_ALIASES.get(first.lower(), first)
     if first.lower() in COUNTRY_LIKE_AREAS:          # Macau / Hong Kong are their own destinations

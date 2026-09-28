@@ -38,10 +38,28 @@ function Fields({ d, destinations }: { d?: Tables<"destinations">; destinations:
         <span className={label}>URL slug</span>
         <input name="slug" defaultValue={d?.slug} placeholder="auto from name" className={input} />
       </label>
-      <label className="block sm:col-span-2 lg:col-span-4">
+      <label className="block sm:col-span-2">
         <span className={label}>Cover image URL (optional; otherwise a tour photo is used)</span>
         <input name="cover_image_url" defaultValue={d?.cover_image_url ?? ""} className={input} />
       </label>
+      <label className="block">
+        <span className={label}>Map pin latitude</span>
+        <input name="lat" inputMode="decimal" placeholder="e.g. 20.02" defaultValue={d?.lat ?? ""} className={input} />
+      </label>
+      <label className="block">
+        <span className={label}>Map pin longitude</span>
+        <input name="lng" inputMode="decimal" placeholder="e.g. 110.35" defaultValue={d?.lng ?? ""} className={input} />
+      </label>
+      {d?.lat != null && d?.lng != null && (
+        <a
+          href={`https://www.openstreetmap.org/?mlat=${d.lat}&mlon=${d.lng}#map=7/${d.lat}/${d.lng}`}
+          target="_blank"
+          rel="noopener"
+          className="text-xs text-navy-600 underline sm:col-span-2 lg:col-span-4"
+        >
+          Check the pin position on a map
+        </a>
+      )}
     </div>
   );
 }

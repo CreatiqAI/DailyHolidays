@@ -405,8 +405,13 @@ export async function saveDestination(id: string | null, _prev: ActionResult, fd
     region: sOrNull(fd, "region"),
     parent_id: sOrNull(fd, "parent_id"),
     cover_image_url: sOrNull(fd, "cover_image_url"),
+    lat: numOrNull(fd, "lat"),
+    lng: numOrNull(fd, "lng"),
   };
   if (values.parent_id === id) return { ok: false, error: "A destination can't be its own parent." };
+  if ((values.lat == null) !== (values.lng == null)) return { ok: false, error: "Enter both latitude and longitude, or neither." };
+  if (values.lat != null && (Math.abs(values.lat) > 90 || Math.abs(values.lng!) > 180))
+    return { ok: false, error: "Latitude must be between -90 and 90, longitude between -180 and 180." };
   const { error } = id
     ? await supabase.from("destinations").update(values).eq("id", id)
     : await supabase.from("destinations").insert(values);

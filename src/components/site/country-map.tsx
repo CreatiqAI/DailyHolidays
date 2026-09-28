@@ -34,6 +34,18 @@ type World = { land: Feature<Geometry>; borders: MultiLineString };
 type Point = MapPin & { x: number; y: number };
 type SpotPoint = MapSpot & { id: string; x: number; y: number };
 type Box = { x1: number; y1: number; x2: number; y2: number };
+/** Pins that overlap at the current zoom are shown as one; anchored on the busiest member. */
+type Cluster = {
+  id: string;
+  x: number;
+  y: number;
+  members: Point[];
+  count: number;
+  live: boolean;
+  image: string | null;
+  name: string;
+  sub: string;
+};
 
 const geoCache = new Map<string, Promise<CountryFeature>>();
 let worldPromise: Promise<World> | null = null;
@@ -58,17 +70,35 @@ function loadWorld() {
 
 const overlaps = (a: Box, b: Box) => !(a.x2 < b.x1 || a.x1 > b.x2 || a.y2 < b.y1 || a.y1 > b.y2);
 
-/** Greedy label placement in screen space: heaviest first; a label is dropped if it would cover another label or a marker. */
-function placeLabels(items: { id: string; weight: number; box: Box }[], obstacles: { id: string; box: Box }[], forced: Set<string>) {
+type LabelSide = "right" | "left" | "below" | "above";
+
+/**
+ * Greedy label placement in screen space: heaviest first. Each label tries the right of its marker,
+ * then the left; it is dropped if both would cover another label or a marker.
+ */
+function placeLabels(
+  items: { id: string; weight: number; boxes: { side: LabelSide; box: Box }[] }[],
+  obstacles: { id: string; box: Box }[],
+  forced: Set<string>,
+) {
   const placed: Box[] = [];
-  const show = new Set<string>();
+  const show = new Map<string, LabelSide>();
   for (const it of [...items].sort((a, b) => b.weight - a.weight)) {
-    const must = forced.has(it.id); // e.g. the selected pin: its label is always shown, so others must avoid it
-    if (!must && (placed.some((b) => overlaps(it.box, b)) || obstacles.some((o) => o.id !== it.id && overlaps(it.box, o.box)))) continue;
-    placed.push(it.box);
-    show.add(it.id);
+    const free = (box: Box) => !placed.some((b) => overlaps(box, b)) && !obstacles.some((o) => o.id !== it.id && overlaps(box, o.box));
+    // e.g. the selected pin: its label is always shown, so others must avoid it
+    const pick = it.boxes.find((b) => free(b.box)) ?? (forced.has(it.id) ? it.boxes[0] : undefined);
+    if (!pick) continue;
+    placed.push(pick.box);
+    show.set(it.id, pick.side);
   }
   return show;
+}
+
+/** Text position for a pin label's first (line 0) or second (line 1) line on the chosen side. */
+function labelAt(side: LabelSide, R: number, line: 0 | 1) {
+  if (side === "below") return { x: 0, y: R + (line ? 34 : 19), textAnchor: "middle" as const };
+  if (side === "above") return { x: 0, y: -R - (line ? 12 : 27), textAnchor: "middle" as const };
+  return { x: side === "left" ? -R - 10 : R + 10, y: line ? 15 : -1, textAnchor: side === "left" ? ("end" as const) : ("start" as const) };
 }
 
 export function CountryMap({
@@ -187,6 +217,35 @@ export function CountryMap({
     });
   }, [projection, paths, pins]);
 
+  // merge pins that would overlap on screen at this zoom
+  const clusters = useMemo<Cluster[]>(() => {
+    const minGap = 2 * R + 6;
+    const groups: { members: Point[]; sx: number; sy: number }[] = [];
+    for (const p of [...points].sort((a, b) => b.count - a.count)) {
+      const [sx, sy] = t.apply([p.x, p.y]);
+      const near = groups.find((g) => Math.hypot(g.sx - sx, g.sy - sy) < minGap);
+      if (near) near.members.push(p);
+      else groups.push({ members: [p], sx, sy });
+    }
+    return groups.map(({ members }) => {
+      const [main] = members;
+      const count = members.reduce((n, m) => n + m.count, 0);
+      const names = members.map((m) => m.name);
+      const single = members.length === 1;
+      return {
+        id: members.map((m) => m.id).join("+"),
+        x: main.x,
+        y: main.y,
+        members,
+        count,
+        live: members.some((m) => m.live),
+        image: members.find((m) => m.image)?.image ?? null,
+        name: single ? main.name : names.length === 2 ? names.join(" · ") : `${names[0]} · ${names[1]} +${names.length - 2}`,
+        sub: single ? `${count} ${count === 1 ? "trip" : "trips"}${main.live ? " · dates open" : ""}` : `${count} trips · ${members.length} places`,
+      };
+    });
+  }, [points, t, R]);
+
   const spotPoints = useMemo<SpotPoint[]>(() => {
     if (!projection) return [];
     return spots.flatMap((s, i) => {
@@ -232,7 +291,6 @@ export function CountryMap({
     return out;
   }, [projection, w, h, t]);
 
-  // which labels fit (screen space, since markers keep their screen size while zooming)
   const showSpots = t.k >= SPOTS_FROM;
   const visibleSpots = useMemo(() => {
     if (!showSpots) return [];
@@ -242,34 +300,59 @@ export function CountryMap({
     });
   }, [showSpots, spotPoints, t, w, h]);
 
+  const clusterOf = useCallback(
+    (memberId: string | null) => (memberId ? clusters.find((c) => c.members.some((m) => m.id === memberId)) ?? null : null),
+    [clusters],
+  );
+  const selectedCluster = clusterOf(selectedId);
+  const highlightCluster = clusterOf(highlightId);
+
+  // which labels fit (screen space, since markers keep their screen size while zooming)
   const labels = useMemo(() => {
     const sp = (p: { x: number; y: number }) => t.apply([p.x, p.y]);
-    const pinObstacles = points.map((p) => {
-      const [x, y] = sp(p);
-      return { id: p.id, box: { x1: x - R, y1: y - R, x2: x + R, y2: y + R } };
+    const forced = new Set([selectedCluster?.id, hoverId, highlightCluster?.id].filter((id): id is string => !!id));
+    const pinObstacles = clusters.map((c) => {
+      const [x, y] = sp(c);
+      return { id: c.id, box: { x1: x - R, y1: y - R, x2: x + R, y2: y + R } };
     });
     const spotObstacles = visibleSpots.map((s) => {
       const [x, y] = sp(s);
       return { id: s.id, box: { x1: x - 6, y1: y - 6, x2: x + 6, y2: y + 6 } };
     });
-    const pinItems = points.map((p) => {
-      const [x, y] = sp(p);
-      const sub = `${p.count} trips${p.live ? " · dates open" : ""}`;
-      const width = Math.max(p.name.length * 8, sub.length * 6.2);
-      return { id: p.id, weight: 1000 + p.count, box: { x1: x + R + 4, y1: y - 14, x2: x + R + 12 + width, y2: y + 22 } };
-    });
+    const pinItems = clusters
+      // while a place is selected, the other pins keep their thumbnails but drop their labels
+      .filter((c) => !selectedCluster || forced.has(c.id))
+      .map((c) => {
+        const [x, y] = sp(c);
+        const width = Math.max(c.name.length * 8, c.sub.length * 6.2);
+        return {
+          id: c.id,
+          weight: 1000 + c.count,
+          boxes: [
+            { side: "right" as const, box: { x1: x + R + 4, y1: y - 14, x2: x + R + 12 + width, y2: y + 22 } },
+            { side: "left" as const, box: { x1: x - R - 12 - width, y1: y - 14, x2: x - R - 4, y2: y + 22 } },
+            { side: "below" as const, box: { x1: x - width / 2 - 4, y1: y + R + 4, x2: x + width / 2 + 4, y2: y + R + 40 } },
+            { side: "above" as const, box: { x1: x - width / 2 - 4, y1: y - R - 44, x2: x + width / 2 + 4, y2: y - R - 8 } },
+          ],
+        };
+      });
     const spotItems =
       t.k >= SPOT_LABELS_FROM
         ? visibleSpots.map((s) => {
             const [x, y] = sp(s);
-            return { id: s.id, weight: 1, box: { x1: x + 8, y1: y - 8, x2: x + 12 + s.name.length * 6.5, y2: y + 8 } };
+            const width = s.name.length * 6.5;
+            return {
+              id: s.id,
+              weight: 1,
+              boxes: [
+                { side: "right" as const, box: { x1: x + 8, y1: y - 8, x2: x + 12 + width, y2: y + 8 } },
+                { side: "left" as const, box: { x1: x - 12 - width, y1: y - 8, x2: x - 8, y2: y + 8 } },
+              ],
+            };
           })
         : [];
-    const forced = new Set([selectedId, hoverId, highlightId].filter((id): id is string => !!id));
-    // while a place is selected, the other pins keep their thumbnails but drop their labels
-    const items = selectedId ? [...pinItems.filter((p) => forced.has(p.id)), ...spotItems] : [...pinItems, ...spotItems];
-    return placeLabels(items, [...pinObstacles, ...spotObstacles], forced);
-  }, [points, visibleSpots, t, R, selectedId, hoverId, highlightId]);
+    return placeLabels([...pinItems, ...spotItems], [...pinObstacles, ...spotObstacles], forced);
+  }, [clusters, visibleSpots, t, R, selectedCluster, hoverId, highlightCluster]);
 
   const flyTo = useCallback((target: ZoomTransform, duration: number) => {
     const svg = svgRef.current;
@@ -303,6 +386,16 @@ export function CountryMap({
     const svg = svgRef.current;
     const z = zoomRef.current;
     if (svg && z) select(svg).transition().duration(300).call(z.scaleBy, factor);
+  };
+
+  // a merged pin zooms in until its members separate; a single pin selects its place
+  const activate = (c: Cluster) => {
+    if (c.members.length === 1) {
+      onSelect(c.members[0].id);
+      return;
+    }
+    const k = Math.min(12, t.k * 2.5);
+    flyTo(zoomIdentity.translate(focusX, focusY).scale(k).translate(-c.x, -c.y), 700);
   };
 
   const inv = 1 / t.k;
@@ -350,7 +443,7 @@ export function CountryMap({
                 <g className="spot-body">
                   <circle r={5} fill="#ffffff" stroke="#e8841a" strokeWidth={2.5} />
                   {labels.has(s.id) && (
-                    <text x={10} y={4} fontSize={11.5} fontWeight={600} fill="#ffffff" stroke="#0b0f29" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">
+                    <text x={labels.get(s.id) === "left" ? -10 : 10} y={4} textAnchor={labels.get(s.id) === "left" ? "end" : "start"} fontSize={11.5} fontWeight={600} fill="#ffffff" stroke="#0b0f29" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">
                       {s.name}
                     </text>
                   )}
@@ -358,53 +451,53 @@ export function CountryMap({
               </g>
             ))}
 
-            {/* one pin per area */}
-            {points.map((p, i) => {
-              const active = p.id === selectedId;
-              const dim = selectedId != null && !active;
-              const showLabel = labels.has(p.id);
+            {/* one pin per place (merged while they overlap) */}
+            {clusters.map((c, i) => {
+              const active = c.id === selectedCluster?.id;
+              const dim = selectedCluster != null && !active;
+              const merged = c.members.length > 1;
               return (
                 <g
-                  key={`${geoId}-${p.id}`}
-                  transform={`translate(${p.x}, ${p.y}) scale(${inv})`}
-                  className={`pin cursor-pointer outline-none ${p.id === highlightId ? "is-hot" : ""}`}
+                  key={`${geoId}-${c.id}`}
+                  transform={`translate(${c.x}, ${c.y}) scale(${inv})`}
+                  className={`pin cursor-pointer outline-none ${c.id === highlightCluster?.id ? "is-hot" : ""}`}
                   style={{ opacity: dim ? 0.55 : 1, transition: "opacity 300ms" }}
                   role="button"
                   tabIndex={0}
-                  aria-label={`${p.name}, ${p.count} trips`}
+                  aria-label={merged ? `${c.name}: ${c.sub}. Zoom in to separate` : `${c.name}, ${c.sub}`}
                   aria-pressed={active}
-                  onClick={() => onSelect(p.id)}
-                  onMouseEnter={() => setHoverId(p.id)}
+                  onClick={() => activate(c)}
+                  onMouseEnter={() => setHoverId(c.id)}
                   onMouseLeave={() => setHoverId(null)}
-                  onFocus={() => setHoverId(p.id)}
+                  onFocus={() => setHoverId(c.id)}
                   onBlur={() => setHoverId(null)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      onSelect(p.id);
+                      activate(c);
                     }
                   }}
                 >
-                  <g className="pin-body" style={{ animationDelay: `${200 + i * 60}ms` }}>
-                    {p.live && <circle r={R + 9} fill="#e8841a" className="pin-pulse" />}
+                  <g className="pin-body" style={{ animationDelay: `${120 + i * 50}ms` }}>
+                    {c.live && <circle r={R + 9} fill="#e8841a" className="pin-pulse" />}
+                    {merged && <circle r={R + 7} fill="none" stroke="#ffffff" strokeOpacity={0.5} strokeWidth={1.5} strokeDasharray="4 4" />}
                     <circle r={R + 4} fill="#0b0f29" fillOpacity={0.55} />
                     <circle r={R + 2} fill={active ? "#e8841a" : "#ffffff"} />
                     <circle r={R} fill="#1b2356" />
-                    {p.image && (
-                      <image href={p.image} x={-R} y={-R} width={2 * R} height={2 * R} preserveAspectRatio="xMidYMid slice" clipPath="url(#pin-clip)" />
+                    {c.image && (
+                      <image href={c.image} x={-R} y={-R} width={2 * R} height={2 * R} preserveAspectRatio="xMidYMid slice" clipPath="url(#pin-clip)" />
                     )}
-                    <circle cx={R * 0.72} cy={-R * 0.72} r={10} fill={p.live ? "#e8841a" : "#ffffff"} stroke="#0b0f29" strokeWidth={1.5} />
-                    <text x={R * 0.72} y={-R * 0.72 + 4} textAnchor="middle" fontSize={11} fontWeight={800} fill={p.live ? "#ffffff" : "#131940"}>
-                      {p.count}
+                    <circle cx={R * 0.72} cy={-R * 0.72} r={10} fill={c.live ? "#e8841a" : "#ffffff"} stroke="#0b0f29" strokeWidth={1.5} />
+                    <text x={R * 0.72} y={-R * 0.72 + 4} textAnchor="middle" fontSize={11} fontWeight={800} fill={c.live ? "#ffffff" : "#131940"}>
+                      {c.count}
                     </text>
-                    {showLabel && (
+                    {labels.has(c.id) && (
                       <>
-                        <text x={R + 10} y={-1} fontSize={14} fontWeight={700} fill="#ffffff" stroke="#0b0f29" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">
-                          {p.name}
+                        <text {...labelAt(labels.get(c.id)!, R, 0)} fontSize={14} fontWeight={700} fill="#ffffff" stroke="#0b0f29" strokeWidth={3.5} paintOrder="stroke" strokeLinejoin="round">
+                          {c.name}
                         </text>
-                        <text x={R + 10} y={15} fontSize={11} fontWeight={600} fill="#fcd29d" stroke="#0b0f29" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">
-                          {p.count} {p.count === 1 ? "trip" : "trips"}
-                          {p.live ? " · dates open" : ""}
+                        <text {...labelAt(labels.get(c.id)!, R, 1)} fontSize={11} fontWeight={600} fill="#fcd29d" stroke="#0b0f29" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">
+                          {c.sub}
                         </text>
                       </>
                     )}
