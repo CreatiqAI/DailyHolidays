@@ -32,6 +32,7 @@ export type ExploreArea = {
   slug: string;
   lat: number | null;
   lng: number | null;
+  image: string | null; // a tour photo from this area, used for its map pin
   tours: ExploreTour[];
 };
 
@@ -116,9 +117,10 @@ export async function getExploreCountries(limit = 10): Promise<ExploreCountry[]>
     if (dest.parent_id) {
       let area = c.areas.find((a) => a.id === dest.id);
       if (!area) {
-        area = { id: dest.id, name: dest.name, slug: dest.slug, lat: dest.lat, lng: dest.lng, tours: [] };
+        area = { id: dest.id, name: dest.name, slug: dest.slug, lat: dest.lat, lng: dest.lng, image: dest.cover_image_url, tours: [] };
         c.areas.push(area);
       }
+      if (!area.image && tour.cover_image_url) area.image = tour.cover_image_url;
       area.tours.push(tour);
     } else {
       c.tours.push(tour);
