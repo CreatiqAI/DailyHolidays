@@ -83,7 +83,7 @@ export default async function HomePage() {
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 py-28 sm:px-6">
-        <Reveal className="relative isolate overflow-hidden rounded-[2rem] px-6 py-16 text-center ring-1 ring-white/10 sm:px-12">
+        <Reveal className="relative isolate overflow-hidden rounded-[2rem] px-6 py-16 text-center text-white ring-1 ring-white/10 sm:px-12">
           {ctaImage && <Image src={ctaImage} alt="" fill sizes="100vw" className="-z-20 object-cover" />}
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-navy-950/90 via-navy-950/70 to-sun-700/60" />
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sun-300">Tailor-made</p>

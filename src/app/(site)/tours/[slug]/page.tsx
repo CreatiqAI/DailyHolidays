@@ -64,7 +64,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
   return (
     <article>
       {/* HERO */}
-      <section id="tour-hero" data-hero className="relative isolate flex min-h-[88svh] items-end overflow-hidden text-white">
+      <section id="tour-hero" data-hero className="relative isolate flex min-h-[100svh] items-end overflow-hidden text-white">
         <div className="absolute inset-0 -z-10 overflow-hidden bg-navy-950">
           {hero ? (
             <div className="hero-bg absolute inset-0">
@@ -279,7 +279,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
 
       {/* CLOSING */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
-        <Reveal className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sun-500 to-sun-700 px-6 py-12 text-center sm:px-12">
+        <Reveal className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sun-500 to-sun-700 px-6 py-12 text-center text-white sm:px-12">
           <Sparkles className="absolute -right-4 -top-4 size-32 opacity-15" />
           <h2 className="text-3xl font-extrabold">Questions about this trip?</h2>
           <p className="mx-auto mt-3 max-w-xl text-sun-50">Our team in Batu Caves can walk you through the itinerary, dates and visa requirements.</p>

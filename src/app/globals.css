@@ -34,6 +34,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Tailwind v4 no longer gives buttons a pointer cursor */
+button:not(:disabled),
+[role="button"],
+[role="tab"],
+[role="option"],
+[role="combobox"],
+label:has(input[type="file"]) {
+  cursor: pointer;
+}
+
 body {
   background: var(--color-sand-50);
   color: var(--color-navy-950);
