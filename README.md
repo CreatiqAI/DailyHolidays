@@ -35,8 +35,10 @@ additionally use `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN` and `SUPAB
 # add a staff login (prints a generated password once)
 node --env-file=.env.local scripts/create-admin.mjs staff@example.com
 
-# homepage "Where to next?" map: country outlines (public/geo, from Natural Earth) and
-# one AI-generated hero image per country via Kie.ai (needs KIE_API_KEY; GPT Image-2 at 1K, 6 credits each)
+# homepage "Where to next?" map: country outlines + world context (public/geo, from Natural Earth) and
+# one AI-generated hero image per country via Kie.ai (needs KIE_API_KEY; GPT Image-2 at 1K, 6 credits each).
+# Satellite imagery inside the country comes from Esri World Imagery tiles (attribution shown on the page;
+# swap `tileUrl` in src/components/site/country-map.tsx to change provider).
 node scripts/build-geo.mjs
 node --env-file=.env.local scripts/generate-country-images.mjs --only japan,thailand
 
