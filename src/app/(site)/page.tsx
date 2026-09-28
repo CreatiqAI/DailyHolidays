@@ -61,13 +61,16 @@ export default async function HomePage() {
 
       {/* SHOWCASE */}
       {featured && (
-        <section id="showcase" className="mx-auto max-w-7xl scroll-mt-20 px-4 pt-28 sm:px-6">
-          <SectionHeading eyebrow="See it before you book" title={<>Your whole holiday, <span className="text-sun-600">before you pay</span></>}>
-            <p className="max-w-sm text-sm text-navy-500">Every trip page shows the full plan. Here&apos;s one of ours, live.</p>
-          </SectionHeading>
-          <Reveal>
-            <TripShowcase tour={featured} />
-          </Reveal>
+        <section id="showcase" className="mx-auto max-w-7xl scroll-mt-20 px-4 pt-28 sm:px-6 lg:pt-12">
+          {/* the heading lives inside the pinned block so it stays on screen while the slides change */}
+          <TripShowcase
+            tour={featured}
+            header={
+              <SectionHeading eyebrow="See it before you book" title={<>Your whole holiday, <span className="text-sun-600">before you pay</span></>}>
+                <p className="max-w-sm text-sm text-navy-500">Scroll to walk through a real trip page. This one is live.</p>
+              </SectionHeading>
+            }
+          />
         </section>
       )}
 
