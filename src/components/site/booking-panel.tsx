@@ -62,11 +62,11 @@ export function BookingPanel({
                     aria-selected={active}
                     onClick={() => setMonth(m)}
                     className={`shrink-0 rounded-2xl px-4 py-2.5 text-left transition ${
-                      active ? "glass-sun" : "glass-light"
+                      active ? "bg-navy-900 text-white" : "glass-light"
                     }`}
                   >
                     <span className="block text-sm font-bold">{formatMonth(`${m}-01`)}</span>
-                    <span className={`text-[11px] ${active ? "text-sun-50" : "text-navy-200"}`}>{low ? `from ${formatRM(low, { compact: true })}` : "ask us"}</span>
+                    <span className={`text-[11px] ${active ? "text-navy-200" : "text-navy-500"}`}>{low ? `from ${formatRM(low, { compact: true })}` : "ask us"}</span>
                   </button>
                 );
               })}
@@ -85,11 +85,11 @@ export function BookingPanel({
                     onClick={() => setSelectedId(isSel ? null : d.id)}
                     style={{ animationDelay: `${i * 40}ms` }}
                     className={`fade-up relative rounded-2xl p-4 text-left ring-1 transition disabled:cursor-not-allowed disabled:opacity-40 ${
-                      isSel ? "bg-sun-50 ring-2 ring-sun-400" : "bg-white ring-navy-100 hover:bg-sand-50 hover:ring-navy-200"
+                      isSel ? "bg-navy-900 ring-navy-900 [&_*]:!text-white" : "bg-white ring-navy-100 hover:ring-navy-300"
                     }`}
                   >
                     {isSel && (
-                      <span className="glass-sun absolute right-3 top-3 grid size-5 place-items-center rounded-full">
+                      <span className="absolute right-3 top-3 grid size-5 place-items-center rounded-full bg-sun-500">
                         <Check className="size-3.5 text-navy-950" />
                       </span>
                     )}

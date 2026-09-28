@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Dancing_Script } from "next/font/google";
+import { Dancing_Script, Manrope, Outfit } from "next/font/google";
 import { site } from "@/lib/site";
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({ variable: "--font-jakarta", subsets: ["latin"] });
+const body = Manrope({ variable: "--font-body", subsets: ["latin"] });
+const heading = Outfit({ variable: "--font-heading", subsets: ["latin"], weight: ["500", "600", "700", "800"] });
 const script = Dancing_Script({ variable: "--font-script", subsets: ["latin"], weight: ["600", "700"] });
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${script.variable} h-full antialiased`}>
+    <html lang="en" className={`${body.variable} ${heading.variable} ${script.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
