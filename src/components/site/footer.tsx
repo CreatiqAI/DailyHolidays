@@ -43,8 +43,8 @@ export function Footer() {
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white">Services</h3>
           <ul className="space-y-2 text-sm">
             <li><Link href="/about#services" className="hover:text-white">Air ticketing</Link></li>
-            <li><Link href="/about#services" className="hover:text-white">Visa applications</Link></li>
-            <li><Link href="/about#services" className="hover:text-white">Travel insurance</Link></li>
+            <li><Link href="/visa" className="hover:text-white">Visa applications</Link></li>
+            <li><Link href="/travel-insurance" className="hover:text-white">Travel insurance</Link></li>
             <li><a href={site.hotelBooking} target="_blank" rel="noopener" className="hover:text-white">Hotel booking</a></li>
             <li><Link href="/contact" className="hover:text-white">Corporate &amp; incentive trips</Link></li>
           </ul>

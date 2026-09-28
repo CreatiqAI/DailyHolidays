@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ArrowRight, Check, ChevronDown, Hotel, MapPin, Plane, Ship, ShieldCheck, Stamp, Users, type LucideIcon } from "lucide-react";
 import { site, whatsappLink } from "@/lib/site";
 import { WhatsAppIcon } from "./icons";
+import { PIN_TOP, useScrollSteps } from "./use-scroll-steps";
 
 type Service = {
   key: string;
@@ -33,6 +34,7 @@ const SERVICES: Service[] = [
     tagline: "Paperwork, handled",
     body: "Heading somewhere that needs a visa? Tell us your passport and destination and we'll help you prepare and submit the application.",
     points: ["Check what your destination requires", "Help with the documents", "Apply in good time before you fly"],
+    link: { href: "/visa", label: "Visa services" },
   },
   {
     key: "insurance",
@@ -40,7 +42,8 @@ const SERVICES: Service[] = [
     title: "Travel insurance",
     tagline: "Travel with cover",
     body: "Insurance arranged together with your booking, so it's one less thing to sort out before you go.",
-    points: ["Add it to any tour or flight", "For individuals and groups", "Arranged before departure"],
+    points: ["AIG, Chubb and RHB plans", "Add it to any tour or flight", "For individuals and groups"],
+    link: { href: "/travel-insurance", label: "Insurance options" },
   },
   {
     key: "hotels",
@@ -104,82 +107,106 @@ function Actions({ s }: { s: Service }) {
   );
 }
 
-/** Services as a selectable list with a detail panel (desktop) or an accordion (phones). */
-export function ServicesExplorer() {
-  const [active, setActive] = useState(SERVICES[0].key);
-  const current = SERVICES.find((s) => s.key === active)!;
+/**
+ * Services list + detail panel. Desktop (tall enough): the section pins and scrolling walks down the list,
+ * swapping the panel. Shorter desktops: hover/click. Phones: an accordion.
+ */
+export function ServicesExplorer({ header }: { header?: ReactNode }) {
+  const [picked, setPicked] = useState(SERVICES[0].key);
+  const { trackRef, stickyRef, enabled: pinned, step, sub, goTo } = useScrollSteps(SERVICES.length, "(min-width: 1024px) and (min-height: 760px)");
+  const active = pinned ? SERVICES[step].key : picked;
+  const current = SERVICES.find((s) => s.key === active);
+
+  const choose = (key: string) => {
+    const i = SERVICES.findIndex((s) => s.key === key);
+    if (!goTo(i)) setPicked(active === key ? "" : key);
+  };
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-      <ul className="space-y-2">
-        {SERVICES.map((s) => {
-          const on = s.key === active;
-          return (
-            <li key={s.key}>
-              <button
-                type="button"
-                onClick={() => setActive(on ? "" : s.key)}
-                onPointerEnter={(e) => e.pointerType === "mouse" && setActive(s.key)}
-                aria-expanded={on}
-                className={`group flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-left transition duration-300 ${
-                  on ? "bg-white shadow-md shadow-navy-900/10 ring-1 ring-navy-100" : "hover:bg-white/70"
-                }`}
-              >
-                <span className={`grid size-11 shrink-0 place-items-center rounded-2xl transition duration-300 ${on ? "glass-sun" : "bg-navy-50 text-navy-500"}`}>
-                  <s.icon className="size-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className={`block font-bold ${on ? "text-navy-950" : "text-navy-700"}`}>{s.title}</span>
-                  <span className="block text-xs text-navy-400">{s.tagline}</span>
-                </span>
-                <ChevronDown className={`size-4 text-navy-300 transition duration-300 lg:-rotate-90 ${on ? "rotate-180 text-sun-600 lg:rotate-0 lg:opacity-0" : ""}`} />
-              </button>
+    <div ref={trackRef} className={pinned ? "h-[340vh]" : ""}>
+      <div
+        ref={stickyRef}
+        className={pinned ? "sticky flex h-[calc(100vh-96px)] flex-col justify-center pb-6" : ""}
+        style={pinned ? { top: PIN_TOP } : undefined}
+      >
+        {header}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:items-center">
+          <ul className={pinned ? "space-y-1" : "space-y-2"}>
+            {SERVICES.map((s) => {
+              const on = s.key === active;
+              return (
+                <li key={s.key}>
+                  <button
+                    type="button"
+                    onClick={() => choose(s.key)}
+                    onPointerEnter={(e) => !pinned && e.pointerType === "mouse" && setPicked(s.key)}
+                    aria-expanded={on}
+                    className={`group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl px-4 text-left transition duration-300 ${pinned ? "py-2.5" : "py-3.5"} ${
+                      on ? "bg-white shadow-md shadow-navy-900/10 ring-1 ring-navy-100" : "hover:bg-white/70"
+                    }`}
+                  >
+                    <span className={`grid size-11 shrink-0 place-items-center rounded-2xl transition duration-300 ${on ? "glass-sun" : "bg-navy-50 text-navy-500"}`}>
+                      <s.icon className="size-5" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className={`block font-bold ${on ? "text-navy-950" : "text-navy-700"}`}>{s.title}</span>
+                      <span className="block text-xs text-navy-400">{s.tagline}</span>
+                    </span>
+                    <ChevronDown className={`size-4 text-navy-300 transition duration-300 lg:-rotate-90 ${on ? "rotate-180 text-sun-600 lg:rotate-0 lg:opacity-0" : ""}`} />
+                    {on && pinned && (
+                      <span className="absolute inset-x-4 bottom-0 h-0.5 overflow-hidden rounded-full bg-navy-50">
+                        <span className="block h-full origin-left rounded-full bg-sun-500 transition-transform duration-150" style={{ transform: `scaleX(${Math.max(0.04, sub)})` }} />
+                      </span>
+                    )}
+                  </button>
 
-              {/* phones: details open inline */}
-              <div className={`grid transition-all duration-500 lg:hidden ${on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-                <div className="overflow-hidden">
-                  <div className="space-y-4 px-4 pb-2 pt-4">
-                    <p className="text-sm leading-relaxed text-navy-600">{s.body}</p>
-                    <ul className="space-y-1.5">
-                      {s.points.map((p) => (
-                        <li key={p} className="flex gap-2 text-sm text-navy-700">
-                          <Check className="mt-0.5 size-4 shrink-0 text-sun-600" /> {p}
-                        </li>
-                      ))}
-                    </ul>
-                    <Actions s={s} />
+                  {/* phones: details open inline */}
+                  <div className={`grid transition-all duration-500 lg:hidden ${on ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                    <div className="overflow-hidden">
+                      <div className="space-y-4 px-4 pb-2 pt-4">
+                        <p className="text-sm leading-relaxed text-navy-600">{s.body}</p>
+                        <ul className="space-y-1.5">
+                          {s.points.map((p) => (
+                            <li key={p} className="flex gap-2 text-sm text-navy-700">
+                              <Check className="mt-0.5 size-4 shrink-0 text-sun-600" /> {p}
+                            </li>
+                          ))}
+                        </ul>
+                        <Actions s={s} />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* desktop: large detail panel */}
-      {current && (
-        <div className="relative hidden overflow-hidden rounded-[2rem] bg-white p-10 shadow-xl shadow-navy-900/10 ring-1 ring-navy-100 lg:block">
-          <current.icon className="pointer-events-none absolute -right-10 -top-10 size-72 text-sun-500/[0.07]" strokeWidth={1} />
-          <div key={current.key} className="fade-up relative space-y-6">
-            <span className="glass-sun grid size-16 place-items-center rounded-3xl">
-              <current.icon className="size-8" />
-            </span>
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sun-600">{current.tagline}</p>
-              <h3 className="mt-2 text-3xl font-extrabold text-navy-950">{current.title}</h3>
-              <p className="mt-3 max-w-lg text-lg leading-relaxed text-navy-600">{current.body}</p>
-            </div>
-            <ul className="grid gap-3 sm:grid-cols-3">
-              {current.points.map((p, i) => (
-                <li key={p} className="fade-up rounded-2xl bg-sand-50 p-4 text-sm font-medium text-navy-800 ring-1 ring-navy-100" style={{ animationDelay: `${120 + i * 80}ms` }}>
-                  <Check className="mb-2 size-4 text-sun-600" /> {p}
                 </li>
-              ))}
-            </ul>
-            <Actions s={current} />
-          </div>
+              );
+            })}
+          </ul>
+
+          {/* desktop: large detail panel */}
+          {current && (
+            <div className="relative hidden overflow-hidden rounded-[2rem] bg-white p-10 shadow-xl shadow-navy-900/10 ring-1 ring-navy-100 lg:block">
+              <current.icon className="pointer-events-none absolute -right-10 -top-10 size-72 text-sun-500/[0.07]" strokeWidth={1} />
+              <div key={current.key} className="fade-up relative space-y-6">
+                <span className="glass-sun grid size-16 place-items-center rounded-3xl">
+                  <current.icon className="size-8" />
+                </span>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sun-600">{current.tagline}</p>
+                  <h3 className="mt-2 text-3xl font-extrabold text-navy-950">{current.title}</h3>
+                  <p className="mt-3 max-w-lg text-lg leading-relaxed text-navy-600">{current.body}</p>
+                </div>
+                <ul className="grid gap-3 sm:grid-cols-3">
+                  {current.points.map((p, i) => (
+                    <li key={p} className="fade-up rounded-2xl bg-sand-100 p-4 text-sm font-medium text-navy-800 ring-1 ring-navy-100" style={{ animationDelay: `${120 + i * 80}ms` }}>
+                      <Check className="mb-2 size-4 text-sun-600" /> {p}
+                    </li>
+                  ))}
+                </ul>
+                <Actions s={current} />
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -75,13 +75,14 @@ export default async function HomePage() {
       )}
 
       {/* SERVICES */}
-      <section id="services" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-28 sm:px-6">
-        <SectionHeading eyebrow="More than tours" title="Everything else for your trip">
-          <p className="max-w-sm text-sm text-navy-500">Flights, visas, insurance and hotels, from the same team that plans your tour.</p>
-        </SectionHeading>
-        <Reveal>
-          <ServicesExplorer />
-        </Reveal>
+      <section id="services" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-28 sm:px-6 lg:pt-12">
+        <ServicesExplorer
+          header={
+            <SectionHeading eyebrow="More than tours" title="Everything else for your trip">
+              <p className="max-w-sm text-sm text-navy-500">Flights, visas, insurance and hotels, from the same team that plans your tour.</p>
+            </SectionHeading>
+          }
+        />
       </section>
 
       {/* CTA */}
