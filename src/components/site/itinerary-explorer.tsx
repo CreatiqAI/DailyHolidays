@@ -104,7 +104,8 @@ function withoutOutliers(stops: TripStop[]) {
   if (stops.length < 4) return stops;
   const centre = { lat: median(stops.map((s) => s.lat)), lng: median(stops.map((s) => s.lng)) };
   const dist = stops.map((s) => km(centre, s));
-  const limit = Math.max(400, median(dist) * 5);
+  // generous: multi-country trips (Paris then Switzerland) must stay intact; only clearly misplaced stops go
+  const limit = Math.max(1000, median(dist) * 6);
   return stops.filter((_, i) => dist[i] <= limit);
 }
 
@@ -150,10 +151,7 @@ export function ItineraryExplorer({ days }: { days: ItineraryDay[] }) {
       {hasMap && (
         <div className="sticky top-16 z-10 -mx-4 h-[38svh] sm:mx-0 lg:order-2 lg:top-24 lg:h-[calc(100svh-8rem)]">
           <div className="relative h-full overflow-hidden shadow-2xl ring-1 ring-navy-100 sm:rounded-3xl">
-            <TripMap stops={stops} activeDay={activeDay} onSelectDay={goToDay} />
-            <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-navy-950/75 px-3 py-1.5 text-xs font-semibold text-white ring-1 ring-white/10 backdrop-blur">
-              {activeDay == null ? `${days.length} days · the whole route` : `Day ${activeDay} of ${days.length}`}
-            </div>
+            <TripMap stops={stops} activeDay={activeDay} onSelectDay={(d) => (d == null ? setActiveDay(null) : goToDay(d))} />
           </div>
         </div>
       )}

@@ -343,8 +343,7 @@ export function TripShowcase({
                 <TripMap
                   stops={stops}
                   activeDay={activeMapDay}
-                  onSelectDay={setMapDay}
-                />
+                  onSelectDay={setMapDay} showDayBar={false} />
                 <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-navy-950/75 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">
                   {activeMapDay
                     ? `Day ${activeMapDay} of ${tour.days.length}`

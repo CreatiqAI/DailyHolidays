@@ -347,3 +347,18 @@ html[data-bookbar] .wa-fab {
     transform: scaleX(1);
   }
 }
+
+/* moving dashes along the active day's route show the direction of travel */
+.route-flow {
+  animation: route-flow 1.4s linear infinite;
+}
+@keyframes route-flow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-flow {
+    animation: none;
+  }
+}
