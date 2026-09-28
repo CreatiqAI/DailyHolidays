@@ -56,3 +56,68 @@ body {
   font-weight: 700;
   color: #fff;
 }
+
+/* explore hero */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hero-bg {
+  animation: hero-in 900ms ease-out both;
+}
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+}
+
+.country-path {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: country-in 800ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes country-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pin-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pin-pulse 2.2s ease-out infinite;
+}
+@keyframes pin-pulse {
+  0% {
+    transform: scale(0.35);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-bg,
+  .country-path,
+  .pin-pulse {
+    animation: none;
+  }
+  .hero-bg {
+    opacity: 0.4;
+  }
+}

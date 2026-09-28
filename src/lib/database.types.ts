@@ -34,6 +34,8 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           id: string
+          lat: number | null
+          lng: number | null
           name: string
           parent_id: string | null
           region: string | null
@@ -43,6 +45,8 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           id?: string
+          lat?: number | null
+          lng?: number | null
           name: string
           parent_id?: string | null
           region?: string | null
@@ -52,6 +56,8 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           id?: string
+          lat?: number | null
+          lng?: number | null
           name?: string
           parent_id?: string | null
           region?: string | null

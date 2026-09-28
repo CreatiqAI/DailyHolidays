@@ -35,6 +35,11 @@ additionally use `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN` and `SUPAB
 # add a staff login (prints a generated password once)
 node --env-file=.env.local scripts/create-admin.mjs staff@example.com
 
+# homepage "Where to next?" map: country outlines (public/geo, from Natural Earth) and
+# one AI-generated hero image per country via Kie.ai (needs KIE_API_KEY; GPT Image-2 at 1K, 6 credits each)
+node scripts/build-geo.mjs
+node --env-file=.env.local scripts/generate-country-images.mjs --only japan,thailand
+
 # change the database: create a migration, edit it, push it, refresh the TS types
 supabase migration new <name>
 supabase db push
