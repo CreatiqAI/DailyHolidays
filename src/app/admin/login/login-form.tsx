@@ -9,8 +9,8 @@ export function LoginForm() {
       {(state) => (
         <>
           <label className="block">
-            <span className={label}>Email</span>
-            <input name="email" type="email" required autoComplete="email" className={input} />
+            <span className={label}>Username or email</span>
+            <input name="email" type="text" required autoComplete="username" autoCapitalize="none" spellCheck={false} className={input} />
           </label>
           <label className="block">
             <span className={label}>Password</span>

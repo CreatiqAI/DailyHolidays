@@ -146,7 +146,7 @@ export function ItineraryExplorer({ days }: { days: ItineraryDay[] }) {
   };
 
   return (
-    <div className={hasMap ? "grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]" : "mx-auto max-w-3xl"}>
+    <div className={hasMap ? "grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]" : "mx-auto max-w-3xl"}>
       {hasMap && (
         <div className="sticky top-16 z-10 -mx-4 h-[38svh] sm:mx-0 lg:order-2 lg:top-24 lg:h-[calc(100svh-8rem)]">
           <div className="relative h-full overflow-hidden shadow-2xl ring-1 ring-white/10 sm:rounded-3xl">

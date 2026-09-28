@@ -115,15 +115,15 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
                 {tour.price_from_myr ? <span className="text-base font-medium text-navy-200"> / person</span> : null}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <a href="#book" className="glass-sun inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white transition">
+            <div className="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-wrap">
+              <a href="#book" className="glass-sun inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-semibold text-white transition sm:px-6">
                 <CalendarDays className="size-4" /> Choose a date
               </a>
               <a
                 href={whatsappLink(`Hi Daily Holidays! I'm interested in "${tour.title}".`)}
                 target="_blank"
                 rel="noopener"
-                className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-white transition"
+                className="glass inline-flex items-center justify-center gap-2 rounded-full px-4 py-3 font-semibold text-white transition sm:px-6"
               >
                 <WhatsAppIcon className="size-4" /> WhatsApp us
               </a>
@@ -132,8 +132,11 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
 
           {facts.length > 0 && (
             <dl className="glass mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl sm:grid-cols-3 lg:grid-cols-5">
-              {facts.map((f) => (
-                <div key={f.label} className="bg-navy-950/40 p-4">
+              {facts.map((f, i) => (
+                <div
+                  key={f.label}
+                  className={`bg-navy-950/40 p-4 ${i === facts.length - 1 && facts.length % 2 === 1 ? "col-span-2 sm:col-span-1" : ""}`}
+                >
                   <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-navy-200">
                     <f.icon className="size-3.5 text-sun-300" /> {f.label}
                   </dt>
@@ -149,7 +152,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       {tour.highlights.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pt-20 sm:px-6">
           <SectionHeading eyebrow="Why you'll love it" title="Trip highlights" />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {tour.highlights.map((h, i) => (
               <Reveal key={h} delay={i * 70}>
                 <div className="flex h-full gap-4 rounded-3xl bg-white/[0.04] p-5 ring-1 ring-white/10 transition hover:bg-white/[0.07] hover:ring-sun-400/40">
@@ -193,7 +196,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       {(tour.inclusions.length > 0 || tour.exclusions.length > 0) && (
         <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6">
           <SectionHeading eyebrow="The fine print" title="What's included" />
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {tour.inclusions.length > 0 && (
               <Reveal className="rounded-3xl bg-white/[0.04] p-6 ring-1 ring-white/10">
                 <h3 className="flex items-center gap-2 font-semibold text-white"><span className="grid size-7 place-items-center rounded-full bg-emerald-500/20"><Check className="size-4 text-emerald-300" /></span> Included</h3>
@@ -232,7 +235,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
       {tour.pdfs.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6">
           <SectionHeading eyebrow="Take it with you" title="Full itinerary" />
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {tour.pdfs.map((p, i) => (
               <Reveal key={p.id} delay={i * 70}>
                 <a
@@ -264,7 +267,7 @@ export default async function TourPage(props: PageProps<"/tours/[slug]">) {
               </Link>
             )}
           </SectionHeading>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {related.slice(0, 4).map((t, i) => (
               <Reveal key={t.id} delay={i * 80}>
                 <TourCard tour={t} />

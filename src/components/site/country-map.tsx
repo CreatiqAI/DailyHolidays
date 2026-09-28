@@ -76,11 +76,14 @@ function placeLabels(
   items: { id: string; weight: number; boxes: { side: LabelSide; box: Box }[] }[],
   obstacles: { id: string; box: Box }[],
   forced: Set<string>,
+  bounds: Box,
 ) {
   const placed: Box[] = [];
   const show = new Map<string, LabelSide>();
+  const inside = (b: Box) => b.x1 >= bounds.x1 && b.x2 <= bounds.x2 && b.y1 >= bounds.y1 && b.y2 <= bounds.y2;
   for (const it of [...items].sort((a, b) => b.weight - a.weight)) {
-    const free = (box: Box) => !placed.some((b) => overlaps(box, b)) && !obstacles.some((o) => o.id !== it.id && overlaps(box, o.box));
+    const free = (box: Box) =>
+      inside(box) && !placed.some((b) => overlaps(box, b)) && !obstacles.some((o) => o.id !== it.id && overlaps(box, o.box));
     // e.g. the selected pin: its label is always shown, so others must avoid it
     const pick = it.boxes.find((b) => free(b.box)) ?? (forced.has(it.id) ? it.boxes[0] : undefined);
     if (!pick) continue;
@@ -327,8 +330,9 @@ export function CountryMap({
             };
           })
         : [];
-    return placeLabels([...pinItems, ...spotItems], [...pinObstacles, ...spotObstacles], forced);
-  }, [clusters, visibleSpots, t, R, selectedCluster, hoverId, highlightCluster]);
+    // keep labels on screen and clear of the zoom buttons on the right
+    return placeLabels([...pinItems, ...spotItems], [...pinObstacles, ...spotObstacles], forced, { x1: 6, y1: 0, x2: w - 64, y2: h });
+  }, [clusters, visibleSpots, t, R, selectedCluster, hoverId, highlightCluster, w, h]);
 
   const flyTo = useCallback((target: ZoomTransform, duration: number) => {
     const svg = svgRef.current;

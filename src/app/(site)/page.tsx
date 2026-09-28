@@ -55,7 +55,7 @@ export default async function HomePage() {
           </Link>
         </SectionHeading>
         {upcoming.length > 0 ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {upcoming.map((t, i) => (
               <Reveal key={t.id} delay={(i % 4) * 80}>
                 <TourCard tour={t} />
@@ -72,7 +72,7 @@ export default async function HomePage() {
       {/* FEATURES */}
       <section className="mx-auto max-w-7xl px-4 pt-28 sm:px-6">
         <SectionHeading eyebrow="Plan with confidence" title="Know the whole trip before you go" />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 90}>
               <div className="group h-full rounded-3xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-7 ring-1 ring-white/10 transition hover:ring-sun-400/40">
@@ -90,7 +90,7 @@ export default async function HomePage() {
       {/* SERVICES */}
       <section id="services" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-28 sm:px-6">
         <SectionHeading eyebrow="More than tours" title="Everything for your trip, in one place" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s, i) => {
             const inner = (
               <>

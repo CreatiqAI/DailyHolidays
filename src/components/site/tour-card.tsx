@@ -13,7 +13,7 @@ export function TourCard({ tour, priority = false }: { tour: TourCardData; prior
   return (
     <Link
       href={`/tours/${tour.slug}`}
-      className="group relative block aspect-[4/5] overflow-hidden rounded-3xl bg-navy-800 ring-1 ring-white/10 transition duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/40 hover:ring-sun-400/70"
+      className="group relative block aspect-[5/4] sm:aspect-[4/5] overflow-hidden rounded-3xl bg-navy-800 ring-1 ring-white/10 transition duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/40 hover:ring-sun-400/70"
     >
       {tour.cover_image_url ? (
         <Image

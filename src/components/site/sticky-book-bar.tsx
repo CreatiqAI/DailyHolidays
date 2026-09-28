@@ -39,12 +39,18 @@ export function StickyBookBar({
 
   const show = pastHero && !atBook;
 
+  // the bar carries its own WhatsApp button, so the floating one steps aside
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-bookbar", show);
+    return () => document.documentElement.removeAttribute("data-bookbar");
+  }, [show]);
+
   return (
     <div
       className={`fixed inset-x-0 bottom-0 z-40 transition duration-500 ${show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"}`}
       aria-hidden={!show}
     >
-      <div className="mx-auto mb-3 flex max-w-5xl items-center gap-3 rounded-2xl bg-navy-900/85 p-3 pl-5 shadow-2xl shadow-black/50 ring-1 ring-white/15 backdrop-blur-xl sm:mb-5 sm:mr-24 lg:mr-auto">
+      <div className="mx-3 mb-3 flex max-w-5xl items-center gap-3 rounded-2xl bg-navy-900/85 p-3 pl-5 shadow-2xl shadow-black/50 ring-1 ring-white/15 backdrop-blur-xl sm:mx-auto sm:mb-5">
         <div className="min-w-0 flex-1">
           <p className="hidden truncate text-sm font-semibold text-white sm:block">{title}</p>
           <p className="text-xs text-navy-200">

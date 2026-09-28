@@ -52,7 +52,7 @@ export default async function AboutPage() {
         </div>
       </PageHero>
 
-      <section className="mx-auto grid max-w-7xl gap-10 px-4 pt-20 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 pt-20 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:items-center">
         <Reveal className="space-y-5 text-lg leading-relaxed text-navy-100">
           <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sun-300">Who we are</p>
           <p className="text-2xl font-bold leading-snug text-white sm:text-3xl">
@@ -79,7 +79,7 @@ export default async function AboutPage() {
 
       <section id="services" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-24 sm:px-6">
         <SectionHeading eyebrow="What we do" title="Everything for your trip" />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s, i) => (
             <Reveal key={s.title} delay={(i % 3) * 70}>
               <div className="h-full rounded-3xl bg-white/[0.04] p-6 ring-1 ring-white/10 transition hover:bg-white/[0.07] hover:ring-sun-400/40">

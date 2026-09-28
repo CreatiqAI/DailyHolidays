@@ -32,9 +32,9 @@ export default async function ContactPage() {
         subtitle="Send us your travel dates and ideas, message us on WhatsApp, or drop by our office in Batu Caves."
       />
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-24 pt-10 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 pb-24 pt-10 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
         <div className="space-y-6">
-          <Reveal className="grid gap-4 sm:grid-cols-2">
+          <Reveal className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <a
               href={whatsappLink("Hi Daily Holidays!")}
               target="_blank"

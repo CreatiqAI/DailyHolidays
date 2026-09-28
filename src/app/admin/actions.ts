@@ -37,8 +37,11 @@ function publish() {
 
 export async function signIn(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email: s(fd, "email"), password: s(fd, "password") });
-  if (error) return { ok: false, error: "Wrong email or password." };
+  // staff may sign in with a plain username: "admin" -> admin@dailyholidays.local
+  const login = s(fd, "email").toLowerCase();
+  const email = login.includes("@") ? login : `${login}@dailyholidays.local`;
+  const { error } = await supabase.auth.signInWithPassword({ email, password: s(fd, "password") });
+  if (error) return { ok: false, error: "Wrong username/email or password." };
   const { data: isAdmin } = await supabase.rpc("is_admin");
   if (!isAdmin) {
     await supabase.auth.signOut();

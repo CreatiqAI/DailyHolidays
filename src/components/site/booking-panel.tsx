@@ -38,7 +38,7 @@ export function BookingPanel({
     : `I'm interested in "${tourTitle}".`;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
       <div className="rounded-3xl bg-white/[0.04] p-5 ring-1 ring-white/10 backdrop-blur sm:p-7">
         {departures.length === 0 ? (
           <div className="flex h-full flex-col items-start justify-center gap-3 py-8">
