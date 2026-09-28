@@ -201,8 +201,22 @@ export function CountryMap({
     if (!projection || !feature) return null;
     const path = geoPath(projection);
     const [[x1, y1], [x2, y2]] = path.bounds(feature);
+    // the glowing outline traces only substantial landmasses; tiny islands would render as orange specks
+    // (they still show their satellite imagery through the clip, with a thin edge)
+    const geom = feature.geometry;
+    const polys = geom.type === "MultiPolygon" ? geom.coordinates : geom.type === "Polygon" ? [geom.coordinates] : [];
+    const withArea = polys.map((coordinates) => {
+      const f = { type: "Feature" as const, properties: {}, geometry: { type: "Polygon" as const, coordinates } };
+      return { f, area: path.area(f) };
+    });
+    const largest = Math.max(0, ...withArea.map((p) => p.area));
+    const isMain = (a: number) => a >= Math.max(60, largest * 0.004);
+    const pathOf = (list: typeof withArea) =>
+      list.length ? (path({ type: "Feature", properties: {}, geometry: { type: "MultiPolygon", coordinates: list.map((p) => p.f.geometry.coordinates) } }) ?? "") : "";
     return {
       country: path(feature) ?? "",
+      outline: withArea.length ? pathOf(withArea.filter((p) => isMain(p.area))) : (path(feature) ?? ""),
+      islets: pathOf(withArea.filter((p) => !isMain(p.area))),
       land: world ? (path(world.land) ?? "") : "",
       borders: world ? (path(world.borders) ?? "") : "",
       centre: [(x1 + x2) / 2, (y1 + y2) / 2] as [number, number],
@@ -340,13 +354,13 @@ export function CountryMap({
       t.k >= SPOT_LABELS_FROM
         ? visibleSpots.map((s) => {
             const [x, y] = sp(s);
-            const width = s.name.length * 6.5;
+            const width = s.name.length * 6.2 + 16; // pill label
             return {
               id: s.id,
               weight: 1,
               boxes: [
-                { side: "right" as const, box: { x1: x + 8, y1: y - 8, x2: x + 12 + width, y2: y + 8 } },
-                { side: "left" as const, box: { x1: x - 12 - width, y1: y - 8, x2: x - 8, y2: y + 8 } },
+                { side: "right" as const, box: { x1: x + 10, y1: y - 12, x2: x + 14 + width, y2: y + 12 } },
+                { side: "left" as const, box: { x1: x - 14 - width, y1: y - 12, x2: x - 10, y2: y + 12 } },
               ],
             };
           })
@@ -432,8 +446,9 @@ export function CountryMap({
               <g key={geoId}>
                 <path d={paths.land} fill="#ffffff" fillOpacity={0.05} />
                 <path d={paths.borders} fill="none" stroke="#ffffff" strokeOpacity={0.16} strokeWidth={0.8 * inv} />
-                <path d={paths.country} fill="none" stroke="#f9b563" strokeOpacity={0.35} strokeWidth={10 * inv} strokeLinejoin="round" />
-                <path d={paths.country} fill="none" stroke="#fcd29d" strokeWidth={2.2 * inv} strokeLinejoin="round" pathLength={1} className="country-draw" />
+                <path d={paths.islets} fill="none" stroke="#fcd29d" strokeOpacity={0.5} strokeWidth={0.8 * inv} />
+                <path d={paths.outline} fill="none" stroke="#f9b563" strokeOpacity={0.35} strokeWidth={10 * inv} strokeLinejoin="round" />
+                <path d={paths.outline} fill="none" stroke="#fcd29d" strokeWidth={2.2 * inv} strokeLinejoin="round" pathLength={1} className="country-draw" />
               </g>
             )}
 
@@ -441,12 +456,21 @@ export function CountryMap({
             {visibleSpots.map((s) => (
               <g key={s.id} transform={`translate(${s.x}, ${s.y}) scale(${inv})`} className="spot">
                 <g className="spot-body">
-                  <circle r={5} fill="#ffffff" stroke="#e8841a" strokeWidth={2.5} />
-                  {labels.has(s.id) && (
-                    <text x={labels.get(s.id) === "left" ? -10 : 10} y={4} textAnchor={labels.get(s.id) === "left" ? "end" : "start"} fontSize={11.5} fontWeight={600} fill="#ffffff" stroke="#0b0f29" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">
-                      {s.name}
-                    </text>
-                  )}
+                  <circle r={9} fill="#ffffff" fillOpacity={0.16} />
+                  <circle r={3.5} fill="#ffffff" stroke="#0b0f29" strokeOpacity={0.6} strokeWidth={1.5} />
+                  {labels.has(s.id) && (() => {
+                    const wLabel = s.name.length * 6.2 + 16;
+                    const left = labels.get(s.id) === "left";
+                    const x0 = left ? -12 - wLabel : 12;
+                    return (
+                      <g className="spot-label">
+                        <rect x={x0} y={-10} width={wLabel} height={20} rx={10} fill="#0b0f29" fillOpacity={0.72} stroke="#ffffff" strokeOpacity={0.14} />
+                        <text x={x0 + wLabel / 2} y={4} textAnchor="middle" fontSize={11} fontWeight={600} fill="#ffffff">
+                          {s.name}
+                        </text>
+                      </g>
+                    );
+                  })()}
                 </g>
               </g>
             ))}
